@@ -11,7 +11,7 @@ class Vertex:
             self.outEdges = self.inEdges
         
     def removeMe(self):
-        self.graph.remove(self)
+        return self.graph.removeVertex(self)
     
     
 class Edge:
@@ -26,7 +26,7 @@ class Edge:
         self.endVertex.inEdges.update({label: self})
         
     def removeMe(self):
-        self.startVertex.graph.remove(self)
+        return self.startVertex.graph.removeEdge(self)
         
 
 class Graph:
@@ -168,7 +168,7 @@ def directionalGraphTest():
     assert len(g.getVertex("v1").inEdges) == 2
     assert len(g.vertexIndex) == 3
     assert len(g.edgeIndex) == 4
-    assert g.removeVertex("v1")
+    assert g.getVertex("v1").removeMe()
     assert len(g.vertexIndex) == 2
     assert len(g.edgeIndex) == 1
     
