@@ -17,7 +17,7 @@ class Vertex:
         return self.graph
         
     def __str__(self):
-        result = "(" + self.label + ": "
+        result = "[" + self.label + ": "
         cont = ""
         for edge in self.outEdges.values():
             cont += edge.label + ", "
@@ -32,8 +32,8 @@ class Vertex:
                 result = result[:-2]
             result += "), out = (" + cont + ")"
         else:
-            result += cont + ")"
-        return result
+            result += cont
+        return result + "]"
                
     
 class Edge:
@@ -246,12 +246,12 @@ class Graph:
     def __str__(self):
         result = ""
         for vertex in self.vertexIndex.values():
-            result += "[" + str(vertex) + "], "                         
+            result += str(vertex) + ", "                         
         if len(self.vertexIndex) != 0:
             result = result[:-2]
         result += "; "
         for edge in self.edgeIndex.values():
-            result += "[" + str(edge) + "], "                    
+            result += str(edge) + ", "                    
         if len(self.edgeIndex) != 0:
             result = result[:-2]
         return "{" + result + "}"
