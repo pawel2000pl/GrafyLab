@@ -41,7 +41,7 @@ class Edge:
     def __init__(self, startVertex: Vertex, endVertex: Vertex, label: str, wage: float = 1.0):
         assert startVertex.graph == endVertex.graph
         self.label = label
-        self.wage: float = 1.0
+        self.wage: float = wage
         self.startVertex: Vertex = startVertex
         self.endVertex: Vertex = endVertex
         self.startVertex.outEdges.update({label: self})
@@ -65,7 +65,7 @@ class Edge:
         return self.startVertex
     
     def __str__(self):
-        return "(" + self.label + ": " + self.startVertex.label + " -> " + self.endVertex.label + ")"
+        return "(" + self.label + ": " + self.startVertex.label + " -> " + self.endVertex.label + (", wage = " + str(self.wage) if self.wage != 1.0 else "") + ")"
         
 
 class Graph:
@@ -197,11 +197,11 @@ class Graph:
         myCopy = Graph(self.isDirected())
         for label in self.vertexIndex:
             myCopy.addVertex(label)
-        for label, edge in self.edgeIndex.items():
-            myCopy.addEdge(edge.startVertex.label, edge.endVertex.label, label)
+        for edge in self.edgeIndex.values():
+            myCopy.addEdge(edge.startVertex.label, edge.endVertex.label, edge.label, edge.wage)
         return myCopy       
     
-    def takeVertexesDown(self, vertexA, vertexB, newLabel: str):
+    def takeVertexesDown(self, vertexA, vertexB, newLabel: str = None):
         """
         Ściąga dwa wierzchołki w jeden. Usuwa krawędzie pomiędzy tymi wierzchołkami. 
         Zwraca nowy wierzchołek.
@@ -262,12 +262,12 @@ def directionalGraphTest():
     g = Graph(True)
     assert g != None
     assert g.addVertex(g.proposalVertexName()).label == "v1"
-    assert g.addVertex(g.proposalVertexName()).label == "v2"
+    assert g.addVertex().label == "v2"
     assert g.addVertex(g.proposalVertexName()).label == "v3"
     assert g.addEdge("v1", "v2").label == "e1"
     assert g.addEdge("v2", "v3").label == "e2"
-    assert g.addEdge("v3", "v1").label == "e3"
-    assert g.addEdge("v2", "v1").label == "e4"
+    assert g.addEdge("v3", "v1", wage = 1.1).label == "e3"
+    assert g.addEdge("v2", "v1", wage = 1).label == "e4"
     assert str(g) != None
     print(g)
     assert g.getEdge("e1").opposideVertex("v1").label == "v2"
