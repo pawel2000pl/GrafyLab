@@ -13,6 +13,28 @@ class Vertex:
     def removeMe(self):
         return self.graph.removeVertex(self)
     
+    def getGraph(self):
+        return self.graph
+        
+    def __str__(self):
+        result = "(" + self.label + ": "
+        cont = ""
+        for edge in self.outEdges.values():
+            cont += edge.label + ", "
+        if len(self.outEdges) != 0:
+            cont = cont[:-2]
+            
+        if self.graph.isDirected():
+            result += "in = ("
+            for edge in self.inEdges.values():
+                result += edge.label + ", "                
+            if len(self.inEdges) != 0:
+                result = result[:-2]
+            result += "), out = (" + cont + ")"
+        else:
+            result += cont + ")"
+        return result
+               
     
 class Edge:
     
@@ -25,8 +47,25 @@ class Edge:
         self.startVertex.outEdges.update({label: self})
         self.endVertex.inEdges.update({label: self})
         
+    def getGraph(self):
+        assert self.startVertex.graph == self.endVertex.graph
+        return self.startVertex.getGraph()
+    
     def removeMe(self):
-        return self.startVertex.graph.removeEdge(self)
+        return self.getGraph().removeEdge(self)    
+    
+    def opposideVertex(self, vertex: Vertex):
+        """
+        Zwraca wierzchołek po przeciwnej stronie krawędzi, niż ten podany w parametrze.
+        Jako parametr przyjmuje referencję do wierzchołka lub jego etykietę.
+        Używać w przypadku wędrówek po grafach nieskierowanych.
+        """
+        if vertex == self.startVertex or vertex == self.startVertex.label:
+            return self.endVertex
+        return self.startVertex
+    
+    def __str__(self):
+        return "(" + self.label + ": " + self.startVertex.label + " -> " + self.endVertex.label + ")"
         
 
 class Graph:
@@ -152,6 +191,9 @@ class Graph:
         return result
         
     def copy(self):
+        """
+        Tworzy czystą kopię strukturalną grafu.
+        """
         myCopy = Graph(self.isDirected())
         for label in self.vertexIndex:
             myCopy.addVertex(label)
@@ -159,6 +201,60 @@ class Graph:
             myCopy.addEdge(edge.startVertex.label, edge.endVertex.label, label)
         return myCopy       
     
+    def takeVertexesDown(self, vertexA, vertexB, newLabel: str):
+        """
+        Ściąga dwa wierzchołki w jeden. Usuwa krawędzie pomiędzy tymi wierzchołkami. 
+        Zwraca nowy wierzchołek.
+        """
+        if isinstance(vertexA, str):
+            vertexA = self.getVertex(vertexA)
+        if isinstance(vertexB, str):
+            vertexB = self.getVertex(vertexB)
+        if vertexA == None or vertexB == None:
+            raise Exception("Invalid vertex", vertexA, vertexB)
+        newVertex = self.addVertex(newLabel)
+        for edge in set(self.findEdges(vertexA, vertexB, True)).union(set(self.findEdges(vertexB, vertexA, True))):
+            edge.removeMe()
+        if self.isDirected():
+            newVertex.inEdges.update(vertexA.inEdges)
+            newVertex.inEdges.update(vertexB.inEdges)
+        newVertex.outEdges.update(vertexA.outEdges)
+        newVertex.outEdges.update(vertexB.outEdges)
+        for edge in set(newVertex.inEdges.values()).union(set(newVertex.outEdges.values())):
+            if edge.startVertex == vertexA or edge.startVertex == vertexB:
+               edge.startVertex = newVertex                         
+            if edge.endVertex == vertexA or edge.endVertex == vertexB:
+               edge.endVertex = newVertex
+               
+        self.vertexIndex.pop(vertexA.label, None)
+        self.vertexIndex.pop(vertexB.label, None)
+        del vertexA
+        del vertexB
+        return newVertex
+    
+    def takeEdgeDown(self, edge, newVertexLabel: str):
+        """
+        Ściąga krawędź. Usuwa wszystkie pozostałe krawędzie między wierzchołkami tej krawędzi.
+        Zwraca nwy wierzchołek.
+        """
+        if isinstance(edge, str):
+            edge = self.getEdge(edge)
+        if edge == None:
+            raise Exception("Invalid edge", edge)
+        return self.takeVertexesDown(edge.startVertex, edge.endVertex, newVertexLabel)
+    
+    def __str__(self):
+        result = ""
+        for vertex in self.vertexIndex.values():
+            result += "[" + str(vertex) + "], "                         
+        if len(self.vertexIndex) != 0:
+            result = result[:-2]
+        result += "; "
+        for edge in self.edgeIndex.values():
+            result += "[" + str(edge) + "], "                    
+        if len(self.edgeIndex) != 0:
+            result = result[:-2]
+        return "{" + result + "}"
     
 
 def directionalGraphTest():
@@ -172,6 +268,10 @@ def directionalGraphTest():
     assert g.addEdge("v2", "v3").label == "e2"
     assert g.addEdge("v3", "v1").label == "e3"
     assert g.addEdge("v2", "v1").label == "e4"
+    assert str(g) != None
+    print(g)
+    assert g.getEdge("e1").opposideVertex("v1").label == "v2"
+    assert g.getEdge("e1").opposideVertex("v2").label == "v1"
     g2 = g.copy()
     assert len(g.vertexIndex) == len(g2.vertexIndex)
     assert len(g.edgeIndex) == len(g2.edgeIndex)
@@ -196,6 +296,10 @@ def undirectionalGraphTest():
     assert g.addEdge("v1", "v2").label == "e1"
     assert g.addEdge("v2", "v3").label == "e2"
     assert g.addEdge("v3", "v1").label == "e3"
+    assert g.getEdge("e1").opposideVertex("v1").label == "v2"
+    assert g.getEdge("e1").opposideVertex("v2").label == "v1"
+    assert str(g) != None
+    print(g)
     g2 = g.copy()
     assert len(g.vertexIndex) == len(g2.vertexIndex)
     assert len(g.edgeIndex) == len(g2.edgeIndex)
@@ -211,12 +315,50 @@ def undirectionalGraphTest():
     assert len(g.vertexIndex) == 2
     assert len(g.edgeIndex) == 1
         
+        
+def testTakeDown():    
+    g = Graph(True)
+    assert g != None
+    assert g.addVertex(g.proposalVertexName()).label == "v1"
+    assert g.addVertex(g.proposalVertexName()).label == "v2"
+    assert g.addVertex(g.proposalVertexName()).label == "v3"
+    assert g.addEdge("v1", "v2").label == "e1"
+    assert g.addEdge("v2", "v3").label == "e2"
+    assert g.addEdge("v3", "v1").label == "e3"
+    assert g.addEdge("v2", "v1").label == "e4"
+    
+    assert g.takeEdgeDown("e2", "newV").label == "newV"
+    assert g.getVertex("newV") != None
+    assert g.getVertex("newV").label == "newV"
+    assert g.getEdge("e2") == None
+    assert g.getVertex("v2") == None
+    assert g.getVertex("v3") == None
+        
+    assert g.getEdge("e1").endVertex.label == "newV"
+    assert g.getEdge("e3").startVertex.label == "newV"
+    assert g.getEdge("e4").startVertex.label == "newV"
+    
+    assert g.getEdge("e1").startVertex.label != "v2"
+    assert g.getEdge("e1").startVertex.label != "v3"
+    assert g.getEdge("e3").startVertex.label != "v2"
+    assert g.getEdge("e3").startVertex.label != "v3"
+    assert g.getEdge("e4").startVertex.label != "v2"
+    assert g.getEdge("e4").startVertex.label != "v3"
+    
+    assert g.getEdge("e1").endVertex.label != "v2"
+    assert g.getEdge("e1").endVertex.label != "v3"
+    assert g.getEdge("e3").endVertex.label != "v2"
+    assert g.getEdge("e3").endVertex.label != "v3"
+    assert g.getEdge("e4").endVertex.label != "v2"
+    assert g.getEdge("e4").endVertex.label != "v3"
+    
     
 def test():
     print("Testing...")
     
     directionalGraphTest()
     undirectionalGraphTest()
+    testTakeDown()
     
     print("Done.")
     
