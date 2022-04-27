@@ -5,7 +5,7 @@ class Vertex:
         self.label = label
         self.graph = graph
         self.inEdges = {}
-        if self.graph.directed:
+        if self.graph.isDirected():
             self.outEdges = {}
         else:
             self.outEdges = self.inEdges
@@ -36,7 +36,10 @@ class Graph:
         self.edgeIndex = {}
         self.__vertexProposalNameNumber: int = 0
         self.__edgeProposalNameNumber: int = 0
-        self.directed = directed
+        self.__directed = directed
+        
+    def isDirected(self):
+        return self.__directed
         
     def proposalVertexName(self):
         while True:
@@ -147,6 +150,14 @@ class Graph:
             elif len(result) == 0:
                 return None
         return result
+        
+    def copy(self):
+        myCopy = Graph(self.isDirected())
+        for label in self.vertexIndex:
+            myCopy.addVertex(label)
+        for label, edge in self.edgeIndex.items():
+            myCopy.addEdge(edge.startVertex.label, edge.endVertex.label, label)
+        return myCopy       
     
     
 
@@ -161,6 +172,9 @@ def directionalGraphTest():
     assert g.addEdge("v2", "v3").label == "e2"
     assert g.addEdge("v3", "v1").label == "e3"
     assert g.addEdge("v2", "v1").label == "e4"
+    g2 = g.copy()
+    assert len(g.vertexIndex) == len(g2.vertexIndex)
+    assert len(g.edgeIndex) == len(g2.edgeIndex)
     assert g.findEdges("v2", "v3").label == "e2"
     assert g.findEdges("v3", "v2") == None
     assert g.getVertex("v1").inEdges != g.getVertex("v1").outEdges
@@ -182,6 +196,9 @@ def undirectionalGraphTest():
     assert g.addEdge("v1", "v2").label == "e1"
     assert g.addEdge("v2", "v3").label == "e2"
     assert g.addEdge("v3", "v1").label == "e3"
+    g2 = g.copy()
+    assert len(g.vertexIndex) == len(g2.vertexIndex)
+    assert len(g.edgeIndex) == len(g2.edgeIndex)
     assert g.findEdges("v2", "v3").label == "e2"
     assert g.findEdges("v3", "v2").label == "e2"
     assert g.getVertex("v1").inEdges == g.getVertex("v1").outEdges
