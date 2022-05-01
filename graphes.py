@@ -713,9 +713,13 @@ def test():
 
 def generateDocumentation(moduleName: str = "graphes"):
     try:
-        from os import system as shell
-        shell("pydoc3 -w " + moduleName)    
-        return True
+        from sys import platform
+        if platform == "linux" or platform == "linux2":            
+            from os import system as shell
+            shell("pydoc3 -w '" + moduleName + "'")    
+            shell("pydoc3 '" + moduleName + "' | head -n -5 > '" + moduleName + "_documentation.txt'")  
+            return True
+        return False
     except:
         return False
 
