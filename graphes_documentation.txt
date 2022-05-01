@@ -96,9 +96,11 @@ CLASSES
      |  
      |  createAdjacencyMatrix(self)
      |      Tworzy macierz sąsiedztwa.
+     |      Zwraca krotkę: (lista wierzchołków, macierz)
      |  
      |  createIncidenceMatrix(self)
      |      Tworzy macierz incydencji.
+     |      Zwraca krotkę: (lista krawędzi, lista wierzchołków, macierz).
      |  
      |  equals(self, another)
      |      Porównuje strukturalnie dwa grafy.
@@ -123,16 +125,21 @@ CLASSES
      |  loadAdjacencyList(self, dataList)
      |      Dodaje strukturę z listy sąsiedztwa.
      |      Nie sprawdza poprawnośc zapisu.
+     |      Przyjmuje listę w formacie wygenerowanycm przez createAdjacencyList().
      |  
      |  loadAdjacencyMatrix(self, matrix)
      |      Dodaje strukturę z macierzy sąsiedztwa.
      |      Nie ma pewności, że zostanie otrzymany ten sam graf, co przy zapisie
      |      (np.: w przypadku wystąpienia wielokrotnych krawędzi).
      |      Nie sprawdza poprawnośc zapisu.
+     |      Przyjmuje krotkę wygenerowaną przez createAdjacencyMatrix(),
+     |      lub samą macierz (drugi element krotki)
      |  
      |  loadIncidenceMatrix(self, data)
      |      Dodaje strukturę z macierzy incydencji.
      |      Nie sprawdza poprawnośc zapisu.
+     |      Przyjmuje krotkę wygenerowaną przez createIncidenceMatrix(),
+     |      lub samą macierz (trzeci element krotki).
      |  
      |  proposalEdgeName(self)
      |  
@@ -186,7 +193,7 @@ CLASSES
      |  calcDegree(self)
      |      Oblicza na nowo stopień wierzchołka. 
      |      Niezalecane dla skierowanych
-     |      - w przypadku wywołań dla wielu wierchołków lepiej użyć odpowiedniej metody z klasy Graph,
+     |      - w przypadku wywołań dla wielu wierchołków lepiej użyć metody calculateDegreeOfVertexes() z klasy Graph,
      |      lub odwołac się bezpośrednio do pola degree.
      |  
      |  equals(self, another)

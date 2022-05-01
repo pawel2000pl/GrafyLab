@@ -107,9 +107,11 @@ Wynik&nbsp;znajduje&nbsp;się&nbsp;w&nbsp;nowo&nbsp;powstałym&nbsp;polu&nbsp;ka
 
 <dl><dt><a name="Graph-createAdjacencyList"><strong>createAdjacencyList</strong></a>(self)</dt><dd><tt>Tworzy&nbsp;listę&nbsp;sąsiedztwa.</tt></dd></dl>
 
-<dl><dt><a name="Graph-createAdjacencyMatrix"><strong>createAdjacencyMatrix</strong></a>(self)</dt><dd><tt>Tworzy&nbsp;macierz&nbsp;sąsiedztwa.</tt></dd></dl>
+<dl><dt><a name="Graph-createAdjacencyMatrix"><strong>createAdjacencyMatrix</strong></a>(self)</dt><dd><tt>Tworzy&nbsp;macierz&nbsp;sąsiedztwa.<br>
+Zwraca&nbsp;krotkę:&nbsp;(lista&nbsp;wierzchołków,&nbsp;macierz)</tt></dd></dl>
 
-<dl><dt><a name="Graph-createIncidenceMatrix"><strong>createIncidenceMatrix</strong></a>(self)</dt><dd><tt>Tworzy&nbsp;macierz&nbsp;incydencji.</tt></dd></dl>
+<dl><dt><a name="Graph-createIncidenceMatrix"><strong>createIncidenceMatrix</strong></a>(self)</dt><dd><tt>Tworzy&nbsp;macierz&nbsp;incydencji.<br>
+Zwraca&nbsp;krotkę:&nbsp;(lista&nbsp;krawędzi,&nbsp;lista&nbsp;wierzchołków,&nbsp;macierz).</tt></dd></dl>
 
 <dl><dt><a name="Graph-equals"><strong>equals</strong></a>(self, another)</dt><dd><tt>Porównuje&nbsp;strukturalnie&nbsp;dwa&nbsp;grafy.</tt></dd></dl>
 
@@ -127,15 +129,20 @@ Jeżeli&nbsp;wierzchołek&nbsp;nie&nbsp;istnieje,&nbsp;zwraca&nbsp;None.</tt></d
 <dl><dt><a name="Graph-isDirected"><strong>isDirected</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="Graph-loadAdjacencyList"><strong>loadAdjacencyList</strong></a>(self, dataList)</dt><dd><tt>Dodaje&nbsp;strukturę&nbsp;z&nbsp;listy&nbsp;sąsiedztwa.<br>
-Nie&nbsp;sprawdza&nbsp;poprawnośc&nbsp;zapisu.</tt></dd></dl>
+Nie&nbsp;sprawdza&nbsp;poprawnośc&nbsp;zapisu.<br>
+Przyjmuje&nbsp;listę&nbsp;w&nbsp;formacie&nbsp;wygenerowanycm&nbsp;przez&nbsp;<a href="#Graph-createAdjacencyList">createAdjacencyList</a>().</tt></dd></dl>
 
 <dl><dt><a name="Graph-loadAdjacencyMatrix"><strong>loadAdjacencyMatrix</strong></a>(self, matrix)</dt><dd><tt>Dodaje&nbsp;strukturę&nbsp;z&nbsp;macierzy&nbsp;sąsiedztwa.<br>
 Nie&nbsp;ma&nbsp;pewności,&nbsp;że&nbsp;zostanie&nbsp;otrzymany&nbsp;ten&nbsp;sam&nbsp;graf,&nbsp;co&nbsp;przy&nbsp;zapisie<br>
 (np.:&nbsp;w&nbsp;przypadku&nbsp;wystąpienia&nbsp;wielokrotnych&nbsp;krawędzi).<br>
-Nie&nbsp;sprawdza&nbsp;poprawnośc&nbsp;zapisu.</tt></dd></dl>
+Nie&nbsp;sprawdza&nbsp;poprawnośc&nbsp;zapisu.<br>
+Przyjmuje&nbsp;krotkę&nbsp;wygenerowaną&nbsp;przez&nbsp;<a href="#Graph-createAdjacencyMatrix">createAdjacencyMatrix</a>(),<br>
+lub&nbsp;samą&nbsp;macierz&nbsp;(drugi&nbsp;element&nbsp;krotki)</tt></dd></dl>
 
 <dl><dt><a name="Graph-loadIncidenceMatrix"><strong>loadIncidenceMatrix</strong></a>(self, data)</dt><dd><tt>Dodaje&nbsp;strukturę&nbsp;z&nbsp;macierzy&nbsp;incydencji.<br>
-Nie&nbsp;sprawdza&nbsp;poprawnośc&nbsp;zapisu.</tt></dd></dl>
+Nie&nbsp;sprawdza&nbsp;poprawnośc&nbsp;zapisu.<br>
+Przyjmuje&nbsp;krotkę&nbsp;wygenerowaną&nbsp;przez&nbsp;<a href="#Graph-createIncidenceMatrix">createIncidenceMatrix</a>(),<br>
+lub&nbsp;samą&nbsp;macierz&nbsp;(trzeci&nbsp;element&nbsp;krotki).</tt></dd></dl>
 
 <dl><dt><a name="Graph-proposalEdgeName"><strong>proposalEdgeName</strong></a>(self)</dt></dl>
 
@@ -186,7 +193,7 @@ __&nbsp;&nbsp;&nbsp;__&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nb
 
 <dl><dt><a name="Vertex-calcDegree"><strong>calcDegree</strong></a>(self)</dt><dd><tt>Oblicza&nbsp;na&nbsp;nowo&nbsp;stopień&nbsp;wierzchołka.&nbsp;<br>
 Niezalecane&nbsp;dla&nbsp;skierowanych<br>
--&nbsp;w&nbsp;przypadku&nbsp;wywołań&nbsp;dla&nbsp;wielu&nbsp;wierchołków&nbsp;lepiej&nbsp;użyć&nbsp;odpowiedniej&nbsp;metody&nbsp;z&nbsp;klasy&nbsp;<a href="#Graph">Graph</a>,<br>
+-&nbsp;w&nbsp;przypadku&nbsp;wywołań&nbsp;dla&nbsp;wielu&nbsp;wierchołków&nbsp;lepiej&nbsp;użyć&nbsp;metody&nbsp;calculateDegreeOfVertexes()&nbsp;z&nbsp;klasy&nbsp;<a href="#Graph">Graph</a>,<br>
 lub&nbsp;odwołac&nbsp;się&nbsp;bezpośrednio&nbsp;do&nbsp;pola&nbsp;degree.</tt></dd></dl>
 
 <dl><dt><a name="Vertex-equals"><strong>equals</strong></a>(self, another)</dt></dl>

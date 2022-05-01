@@ -36,7 +36,7 @@ class Vertex:
         """
         Oblicza na nowo stopień wierzchołka. 
         Niezalecane dla skierowanych
-        - w przypadku wywołań dla wielu wierchołków lepiej użyć odpowiedniej metody z klasy Graph,
+        - w przypadku wywołań dla wielu wierchołków lepiej użyć metody calculateDegreeOfVertexes() z klasy Graph,
         lub odwołac się bezpośrednio do pola degree.
         """               
         if self.getGraph().isDirected():
@@ -409,6 +409,7 @@ class Graph:
     def createAdjacencyMatrix(self):
         """
         Tworzy macierz sąsiedztwa.
+        Zwraca krotkę: (lista wierzchołków, macierz)
         """
         vertexList = self.vertexIndex.values()
         vertexLabelList = [vertex.label for vertex in vertexList]
@@ -424,6 +425,8 @@ class Graph:
         Nie ma pewności, że zostanie otrzymany ten sam graf, co przy zapisie
         (np.: w przypadku wystąpienia wielokrotnych krawędzi).
         Nie sprawdza poprawnośc zapisu.
+        Przyjmuje krotkę wygenerowaną przez createAdjacencyMatrix(),
+        lub samą macierz (drugi element krotki)
         """
         if isinstance(matrix, tuple):
             labels = matrix[0]
@@ -455,6 +458,7 @@ class Graph:
         """
         Dodaje strukturę z listy sąsiedztwa.
         Nie sprawdza poprawnośc zapisu.
+        Przyjmuje listę w formacie wygenerowanycm przez createAdjacencyList().
         """
         for record in dataList:
             vertex1 = self.getOrAddVertex(record[1])
@@ -465,6 +469,7 @@ class Graph:
     def createIncidenceMatrix(self):
         """
         Tworzy macierz incydencji.
+        Zwraca krotkę: (lista krawędzi, lista wierzchołków, macierz).
         """
         vertexList = self.vertexIndex.values()
         vertexLabelList = [vertex.label for vertex in vertexList]
@@ -481,6 +486,8 @@ class Graph:
         """
         Dodaje strukturę z macierzy incydencji.
         Nie sprawdza poprawnośc zapisu.
+        Przyjmuje krotkę wygenerowaną przez createIncidenceMatrix(),
+        lub samą macierz (trzeci element krotki).
         """
         if isinstance(data, tuple):
             edgeLabelList = data[0]
@@ -488,8 +495,8 @@ class Graph:
             matrix = data[2]
         else:
             matrix = data
-            edgeLabelList = ["e" + str(i) for i in range(len(matrix))]
-            vertexLabelList = ["v" + str(i) for i in range(len(matrix[0]))]
+            edgeLabelList = [self.proposalEdgeName() for i in range(len(matrix))]
+            vertexLabelList = [self.proposalVertexName() for i in range(len(matrix[0]))]
         vertexList = [self.addVertex(label) for label in vertexLabelList]
         negV: int = -1 if self.isDirected() else 1
         for i, col in enumerate(matrix):
@@ -687,16 +694,32 @@ def testLoaders():
     g1 = Graph(True).loadAdjacencyMatrix(g.createAdjacencyMatrix())
     g2 = Graph(True).loadAdjacencyMatrix(g1.createAdjacencyMatrix())
     assert g1.equals(g2)
+    assert g.equals(g1)
     assert g.equals(g2)
     
     g1 = Graph(True).loadAdjacencyList(g.createAdjacencyList())
     g2 = Graph(True).loadAdjacencyList(g1.createAdjacencyList())
     assert g1.equals(g2)
+    assert g.equals(g1)
     assert g.equals(g2)
     
     g1 = Graph(True).loadIncidenceMatrix(g.createIncidenceMatrix())
     g2 = Graph(True).loadIncidenceMatrix(g1.createIncidenceMatrix())
     assert g1.equals(g2)
+    assert g.equals(g1)
+    assert g.equals(g2)
+    
+    
+    g1 = Graph(True).loadAdjacencyMatrix(g.createAdjacencyMatrix()[1])
+    g2 = Graph(True).loadAdjacencyMatrix(g1.createAdjacencyMatrix()[1])
+    assert g1.equals(g2)
+    assert g.equals(g1)
+    assert g.equals(g2)
+    
+    g1 = Graph(True).loadIncidenceMatrix(g.createIncidenceMatrix()[2])
+    g2 = Graph(True).loadIncidenceMatrix(g1.createIncidenceMatrix()[2])
+    assert g1.equals(g2)
+    assert g.equals(g1)
     assert g.equals(g2)
     
     
@@ -713,12 +736,12 @@ def test():
 
 def generateDocumentation(moduleName: str = "graphes"):
     try:
-        from sys import platform
-        if platform == "linux" or platform == "linux2":            
-            from os import system as shell
-            shell("pydoc3 -w '" + moduleName + "'")    
+        print("Generating documentation...")
+        from sys import platform      
+        from os import system as shell
+        if platform == "linux" or platform == "linux2":      
             shell("pydoc3 '" + moduleName + "' | head -n -5 > '" + moduleName + "_documentation.txt'")  
-            return True
+        shell("pydoc3 -w '" + moduleName + "'") 
         return False
     except:
         return False
