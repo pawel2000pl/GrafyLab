@@ -1,3 +1,5 @@
+import random
+
 """
    ___               _           
   / __|_ _ __ _ _ __| |_  ___ ___
@@ -508,9 +510,56 @@ class Graph:
                 if endVertex == None and cell == negV:
                     endVertex = vertexList[j]
             self.addEdge(startVertex, endVertex, edgeLabelList[i]);
-        return self           
-                
-    
+        return self  
+
+    @staticmethod
+    def generateRandomGraph(n, l, directed: bool = False):
+        """
+        Generuje losowy graf, gdzie
+        n - liczba wierzchołków grafu
+        l - liczba krawędzi grafu
+        """
+        g = Graph(directed)
+        for _ in range(n):
+            g.addVertex()
+        
+        vertexList = g.vertexIndex.values()
+        vertexLabelList = [vertex.label for vertex in vertexList]
+        
+        for _ in range(l):
+            vertexLabelListCopy = vertexLabelList.copy()
+            v1 = vertexLabelListCopy.pop(random.randrange(len(vertexLabelList)))
+            v2 = random.choice(vertexLabelListCopy)
+            g.addEdge(v1, v2)
+
+        return g
+
+    @staticmethod
+    def generateRandomGraphProbability(n, p, directed: bool = False):
+        """
+        Generuje losowy graf, gdzie
+        n - liczba wierzchołków grafu
+        p - prawdopodobieństwo, że pomiędzy dwoma wierzchołkami istnieje krawędź
+
+        """
+        if p < 0. or p > 1.:
+            return None
+
+        g = Graph(directed)
+        for _ in range(n):
+            g.addVertex()
+
+        vertexList = g.vertexIndex.values()
+        vertexLabelList = [vertex.label for vertex in vertexList]
+
+        for _ in range(n):
+            currentVertex = vertexLabelList.pop(0)
+            for label in vertexLabelList:
+                if random.random() < p:
+                    g.addEdge(currentVertex, label)
+
+        return g
+
 #  _____       _      
 # |_   _|__ __| |_ ___
 #   | |/ -_|_-<  _(_-<
@@ -586,7 +635,6 @@ def testUndirectionalGraph():
     assert len(g.vertexIndex) == 2
     assert len(g.edgeIndex) == 1
         
-        
 def testTakeDownDirectional():    
     g = Graph(True)
     assert g != None
@@ -633,7 +681,6 @@ def testTakeDownDirectional():
     
     assert g.equals(g)
     
-
 def testTakeDownUndirectional():    
     g = Graph(False)
     assert g != None
@@ -679,8 +726,7 @@ def testTakeDownUndirectional():
     assert g.getEdge("e4").endVertex.label != "v3"    
     
     assert g.equals(g)
-   
-   
+
 def testLoaders():
     g = Graph(True)
     assert g != None
@@ -721,7 +767,15 @@ def testLoaders():
     assert g1.equals(g2)
     assert g.equals(g1)
     assert g.equals(g2)
-    
+
+def testRandomGraphGenerator():
+    g = Graph.generateRandomGraph(3, 3, directed=False)
+    print("Generated graph:")
+    print(g)
+
+    g2 = Graph.generateRandomGraphProbability(5, 0.5, directed=False)
+    print("Generated graph:")
+    print(g2)
     
 def test():
     print("Testing...")
@@ -731,6 +785,8 @@ def test():
     testTakeDownDirectional()
     testTakeDownUndirectional()
     testLoaders()
+    testRandomGraphGenerator()
+
     
     print("Done.")
 
