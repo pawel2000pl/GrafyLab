@@ -1,5 +1,5 @@
 import random
-
+import drawGraph
 """
    ___               _           
   / __|_ _ __ _ _ __| |_  ___ ___
@@ -114,8 +114,11 @@ class Edge:
         return self.startVertex.getGraph()
     
     def removeMe(self):
-        return self.getGraph().removeEdge(self)    
-    
+        return self.getGraph().removeEdge(self)
+
+    def getLabel(self):
+        return self.label
+
     def opposideVertex(self, vertex: Vertex):
         """
         Zwraca wierzchołek po przeciwnej stronie krawędzi, niż ten podany w parametrze.
@@ -155,6 +158,7 @@ class Graph:
         self.__vertexProposalNameNumber: int = 0
         self.__edgeProposalNameNumber: int = 0
         self.__directed = directed
+        self.__numberOfVertexes: int = 0
         
     def isDirected(self):
         return self.__directed
@@ -191,6 +195,7 @@ class Graph:
         if self.getVertex(label) != None:
             raise Exception("Vertex currently exists", label)
         self.vertexIndex.update({label: newVertex})
+        self.__numberOfVertexes += 1
         return newVertex
         
     def getOrAddVertex(self, label: str):
@@ -216,7 +221,10 @@ class Graph:
         self.vertexIndex.pop(vertex.label)
         del vertex
         return True
-    
+
+    def getNumberOfVertexes(self):
+        return self.__numberOfVertexes
+
     def calculateDegreeOfVertexes(self):
         """
         Aktualizuje dla wszystkich wierzchołków stopnie wejściowe i wyjściowe.
@@ -634,7 +642,33 @@ def testUndirectionalGraph():
     assert g.removeVertex("v1")
     assert len(g.vertexIndex) == 2
     assert len(g.edgeIndex) == 1
-        
+
+def testUndirectionalGraphDrawing():
+    g = Graph(False)
+    assert g != None
+    assert g.addVertex(g.proposalVertexName()).label == "v1"
+    assert g.addVertex(g.proposalVertexName()).label == "v2"
+    assert g.addVertex(g.proposalVertexName()).label == "v3"
+    assert g.addVertex(g.proposalVertexName()).label == "v4"
+    assert g.addVertex(g.proposalVertexName()).label == "v5"
+    assert g.addVertex(g.proposalVertexName()).label == "v6"
+    assert g.addVertex(g.proposalVertexName()).label == "v7"
+    assert g.addVertex(g.proposalVertexName()).label == "v8"
+    assert g.addVertex(g.proposalVertexName()).label == "v9"
+    assert g.addEdge("v1", "v2").label == "e1"
+    assert g.addEdge("v2", "v3").label == "e2"
+    assert g.addEdge("v3", "v4").label == "e3"
+    assert g.addEdge("v4", "v5").label == "e4"
+    assert g.addEdge("v5", "v6").label == "e5"
+    assert g.addEdge("v6", "v7").label == "e6"
+    assert g.addEdge("v7", "v8").label == "e7"
+    assert g.addEdge("v8", "v9").label == "e8"
+    assert g.addEdge("v9", "v1").label == "e9"
+    assert g.addEdge("v9", "v2").label == "e10"
+    assert g.addEdge("v6", "v4").label == "e11"
+    assert g.addEdge("v3", "v7").label == "e12"
+    drawGraph.drawVertexes(g, 3, 'test1.png')
+
 def testTakeDownDirectional():    
     g = Graph(True)
     assert g != None
@@ -769,7 +803,8 @@ def testLoaders():
     assert g.equals(g2)
 
 def testRandomGraphGenerator():
-    g = Graph.generateRandomGraph(3, 3, directed=False)
+    g = Graph.generateRandomGraph(4, 7, directed=False)
+    drawGraph.drawVertexes(g, 3, 'random.png')
     print("Generated graph:")
     print(g)
 
@@ -786,7 +821,7 @@ def test():
     testTakeDownUndirectional()
     testLoaders()
     testRandomGraphGenerator()
-
+    testUndirectionalGraphDrawing()
     
     print("Done.")
 
