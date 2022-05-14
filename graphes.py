@@ -597,34 +597,43 @@ class Graph:
 
     def components(self):
         """
-        Algorytm oznaczający spójne składowe
+        Algorytm oznaczający spójne składowe.
+        Zwraca listę krotek (nr skladowej, wierzcholek)
         """
         nr = 0 # nr spójnej składowej
 
-        vertexList = self.vertexIndex.values()
-        vertexLabelList = [vertex.label for vertex in vertexList]
+        vertices = self.vertexIndex.values()
 
-        comp = [-1 for _ in range(len(vertexLabelList))] # wszystkie wierzchołki są nieodwiedzone
+        comp = [] 
+        for v in vertices:
+            comp.append([-1, v]) # wszystkie wierzchołki są nieodwiedzone
 
         for v in comp:
-            if v == -1:
+            if v[0] == -1:
                 nr += 1
-                v = nr # oznaczamy v jako odwiedzony i należący do spójnej składowej nr
-                Graph.components_R(nr, v, self, comp)
-            break
+                v[0] = nr # oznaczamy v jako odwiedzony i należący do spójnej składowej nr
+                comp = Graph.components_R(nr, v[1], self, comp)
+        
+        # for i in comp:
+            # print(i[0], i[1].getLabel())
         return comp
 
     @staticmethod
     def components_R(nr, v, g, comp):
         """
-        
+        Rekursywne przeszukiwanie w głąb
         """
-        vertices = g.getVertexIndex()
-        for v in vertices.values():
-            print(v.getLabel() + ": ")
-            adj = v.adjacentVertices()
-            print(adj)
+        comp[2][0] = 2
+        for u in v.adjacentVertices(): # przeglądamy sąsiadów
+            try:
+                idx = comp.index([-1, u])
+                if comp[idx][0] == -1:
+                    comp[idx][0] = nr
+                    Graph.components_R(nr, comp[idx][1], g, comp)
+            except ValueError:
+                continue
 
+        return comp
 
 #  _____       _      
 # |_   _|__ __| |_ ___
