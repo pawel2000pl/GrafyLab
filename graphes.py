@@ -1,5 +1,6 @@
 import random
 import drawGraph
+import numpy as np
 """
    ___               _           
   / __|_ _ __ _ _ __| |_  ___ ___
@@ -57,6 +58,17 @@ class Vertex:
     def getGraph(self):
         return self.graph
     
+    def adjacentVertices(self):
+        """
+        Zwraca listę wierzchołków przyległych.
+        Tylko dla grafów nieskierowanych.
+        """
+        adjacencies = [] # lista przyległych wierzchołków
+        for e in self.inEdges.values():
+            opposite = e.opposideVertex(self)
+            adjacencies.append(opposite)
+        return adjacencies
+
     def equals(self, another):
         if not isinstance(another, Vertex):
             return False
@@ -72,6 +84,13 @@ class Vertex:
                 return False
         return True
         
+    def getInEdges(self):
+        return self.inEdges
+        
+    def getLabel(self):
+        return self.label
+
+
     def __str__(self):
         result = "[" + self.label + ": "
         cont = ""
@@ -90,7 +109,7 @@ class Vertex:
         else:
             result += cont
         return result + "]"
-               
+
 class Edge:
     """
       ___    _          
@@ -250,7 +269,6 @@ class Graph:
             for vertex in self.vertexIndex.values():
                 vertex.inputDegree = vertex.degree
                 vertex.outputDegree = vertex.degree
-                        
     
     def getEdge(self, label: str):
         """
@@ -460,8 +478,14 @@ class Graph:
         Tworzy listę sąsiedztwa.
         """
         result = []
-        for edge in self.edgeIndex.values():
-            result.append((edge.label, edge.startVertex.label, edge.endVertex.label, edge.wage)) 
+        for v in self.vertexIndex.values():
+            edges = v.getInEdges()
+            adjacencies = [] # lista przyległych wierzchołków
+            for e in edges.values():
+                    opposite = e.opposideVertex(v)
+                    adjacencies.append(opposite)
+            result.append((v.getLabel(), adjacencies))
+
         return result
     
     def loadAdjacencyList(self, dataList):
@@ -520,6 +544,9 @@ class Graph:
             self.addEdge(startVertex, endVertex, edgeLabelList[i]);
         return self  
 
+    def getVertexIndex(self):
+        return self.vertexIndex
+
     @staticmethod
     def generateRandomGraph(n, l, directed: bool = False):
         """
@@ -567,6 +594,37 @@ class Graph:
                     g.addEdge(currentVertex, label)
 
         return g
+
+    def components(self):
+        """
+        Algorytm oznaczający spójne składowe
+        """
+        nr = 0 # nr spójnej składowej
+
+        vertexList = self.vertexIndex.values()
+        vertexLabelList = [vertex.label for vertex in vertexList]
+
+        comp = [-1 for _ in range(len(vertexLabelList))] # wszystkie wierzchołki są nieodwiedzone
+
+        for v in comp:
+            if v == -1:
+                nr += 1
+                v = nr # oznaczamy v jako odwiedzony i należący do spójnej składowej nr
+                Graph.components_R(nr, v, self, comp)
+            break
+        return comp
+
+    @staticmethod
+    def components_R(nr, v, g, comp):
+        """
+        
+        """
+        vertices = g.getVertexIndex()
+        for v in vertices.values():
+            print(v.getLabel() + ": ")
+            adj = v.adjacentVertices()
+            print(adj)
+
 
 #  _____       _      
 # |_   _|__ __| |_ ___
@@ -803,12 +861,39 @@ def testLoaders():
 def testRandomGraphGenerator():
     g = Graph.generateRandomGraph(3, 3, directed=False)
     print("Generated graph:")
+    # drawGraph.drawVertexes(g, 3, 'g.png')
     print(g)
 
     g2 = Graph.generateRandomGraphProbability(5, 0.5, directed=False)
     print("Generated graph:")
     print(g2)
+
+def testStronglyConnectedComponent():
+    g = Graph(directed=False)
+    for _ in range(11):
+        g.addVertex()
+
+    g.addEdge("v1", "v2")
+    g.addEdge("v1", "v3")
+    g.addEdge("v1", "v4")
+    g.addEdge("v1", "v5")
+    g.addEdge("v1", "v6")
+    g.addEdge("v1", "v7")
+    g.addEdge("v2", "v3")
+    g.addEdge("v2", "v6")
+    g.addEdge("v2", "v7")
+    g.addEdge("v3", "v6")
+    g.addEdge("v4", "v7")
+    g.addEdge("v5", "v11")
     
+    g.addEdge("v8", "v9")
+    g.addEdge("v8", "v10")
+    g.addEdge("v9", "v10")
+
+    g.components()
+
+
+
 def test():
     print("Testing...")
     
@@ -841,5 +926,8 @@ def generateDocumentation(moduleName: str = "graphes"):
 # |_|  |_\__,_|_|_||_|
                             
 if __name__ == "__main__":
-    test()
-    generateDocumentation()
+    # test()
+    # generateDocumentation()
+    testStronglyConnectedComponent()
+
+    
