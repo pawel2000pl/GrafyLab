@@ -23,6 +23,7 @@ def drawVertexes(graph, radius, filename):
     g = nx.Graph()
     vertexValue = 1
     coordinates = calculateVertexesCoordinates(graph, radius)
+
     for Vertex in graph.vertexIndex:
         g.add_node(Vertex, pos=coordinates[vertexValue - 1])
         vertexValue = - 1
@@ -31,10 +32,9 @@ def drawVertexes(graph, radius, filename):
         for j in range(len(graph.vertexIndex)):
             j += 1
             if i != j:
-                if graph.findEdges('v' + str(i), 'v' + str(j)) is not None:
+                if graph.findEdges('v' + str(i), 'v' + str(j))  is not None:
                     startVertex = 'v' + str(i)
                     endVertex = 'v' + str(j)
-                    # print(graph.findEdges('v' + str(i), 'v' + str(j)))
                     g.add_edge(startVertex, endVertex)
 
     pos = nx.circular_layout(g)
@@ -58,5 +58,18 @@ def drawMultiGraph(graph, radius, filename):
     pos = nx.spring_layout(g)
     nx.draw(g, pos=pos, with_labels=True)
     nx.draw_networkx_edge_labels(g, pos=pos, edge_labels=edge_labels, rotate=False)
+    plt.savefig(filename)
+    plt.clf()
+
+
+def drawCircularGraph(graph, radius, filename):
+    g = nx.Graph()
+    for label, edge in graph.edgeIndex.items():
+        g.add_edge(edge.startVertex.label, edge.endVertex.label)
+
+    edge_labels = {edge: g.number_of_edges(edge[0], edge[1]) for edge in g.edges()}
+
+    pos = nx.circular_layout(g)
+    nx.draw(g, pos=pos, with_labels=True)
     plt.savefig(filename)
     plt.clf()

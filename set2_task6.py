@@ -1,0 +1,31 @@
+from graphs2 import *
+
+
+if __name__ == "__main__":
+    g = Graph(False)
+    g != None
+    g.addVertex("1")
+    g.addVertex("2")
+    g.addVertex("3")
+    g.addVertex("4")
+    g.addVertex("5")
+    g.addVertex("6")
+    g.addVertex("7")
+    g.addVertex("8")
+    g.addEdge("1", "2")
+    g.addEdge("1", "4")
+    g.addEdge("1", "5")
+    g.addEdge("2", "3")
+    g.addEdge("2", "5")
+    g.addEdge("2", "6")
+    g.addEdge("3", "4")
+    g.addEdge("3", "7")
+    g.addEdge("4", "6")
+    g.addEdge("4", "7")
+    g.addEdge("5", "8")
+    g.addEdge("6", "8")
+    g.addEdge("7", "8")
+    graph = prepareGraphForHamilton(g.createAdjacencyList())
+    result = hamiltonCycle(list(graph))
+    print("Hamilton cycle :",result)
+    drawCircularGraph(g, 4, "Hamilton.png")
