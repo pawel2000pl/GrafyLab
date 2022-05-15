@@ -144,6 +144,12 @@ CLASSES
      |      Przyjmuje krotkę wygenerowaną przez createIncidenceMatrix(),
      |      lub samą macierz (trzeci element krotki).
      |  
+     |  printAdjacencyList(self)
+     |  
+     |  printAdjacencyMatrix(self)
+     |  
+     |  printIncidenceMatrix(self)
+     |  
      |  proposalEdgeName(self)
      |  
      |  proposalVertexName(self)
@@ -256,6 +262,8 @@ FUNCTIONS
     testTakeDownDirectional()
     
     testTakeDownUndirectional()
+    
+    testTextLoaders()
     
     testUndirectionalGraph()
     
