@@ -1,5 +1,5 @@
 import random
-import drawGraph
+
 """
    ___               _           
   / __|_ _ __ _ _ __| |_  ___ ___
@@ -8,6 +8,7 @@ import drawGraph
                |_|   
 """
 
+
 class Vertex:
     """
      __   __       _           
@@ -15,7 +16,7 @@ class Vertex:
       \ V / -_) '_|  _/ -_) \ /
        \_/\___|_|  \__\___/_\_\                    
     """
-    
+
     def __init__(self, label: str, graph):
         self.label: str = label
         self.graph = graph
@@ -27,36 +28,48 @@ class Vertex:
             self.outEdges = {}
         else:
             self.outEdges = self.inEdges
-            
+
     def allEdgesSet(self):
         return set(self.inEdges.values()).union(self.outEdges.values())
-    
+
     def allEdgesList(self):
         return list(self.inEdges.values()) + list(self.outEdges.values())
-        
+
     def calcDegree(self):
         """
         Oblicza na nowo stopień wierzchołka. 
         Niezalecane dla skierowanych
         - w przypadku wywołań dla wielu wierchołków lepiej użyć metody calculateDegreeOfVertexes() z klasy Graph,
         lub odwołac się bezpośrednio do pola degree.
-        """               
+        """
         if self.getGraph().isDirected():
             self.inputDegree = len(self.inEdges)
             self.outputDegree = len(self.outEdges)
             self.degree = self.inputDegree + self.outputDegree
         else:
             dictTab = {True: 1, False: 0}
-            self.degree = sum(dictTab.get(edge.startVertex == self) + dictTab.get(edge.endVertex == self) for edge in self.allEdgesSet());
+            self.degree = sum(dictTab.get(edge.startVertex == self) + dictTab.get(edge.endVertex == self) for edge in
+                              self.allEdgesSet());
             self.inputDegree = self.degree
             self.outputDegree = self.degree
-    
+
     def removeMe(self):
         return self.graph.removeVertex(self)
-    
+
+    def adjacentVertices(self):
+        """
+        Zwraca listę wierzchołków przyległych.
+        Tylko dla grafów nieskierowanych.
+        """
+        adjacencies = [] # lista przyległych wierzchołków
+        for e in self.inEdges.values():
+            opposite = e.oppositeVertex(self)
+            adjacencies.append(opposite)
+        return adjacencies
+
     def getGraph(self):
         return self.graph
-    
+
     def equals(self, another):
         if not isinstance(another, Vertex):
             return False
@@ -71,7 +84,18 @@ class Vertex:
             if another.outEdges.get(edge.label, None) == None:
                 return False
         return True
+
+    def getOutEdges(self):
+        return self.outEdges
+
+    def getInEdges(self):
+        return self.inEdges
+
+    def getLabel(self):
+        return self.label
+
         
+
     def __str__(self):
         result = "[" + self.label + ": "
         cont = ""
@@ -79,18 +103,18 @@ class Vertex:
             cont += edge.label + ", "
         if len(self.outEdges) != 0:
             cont = cont[:-2]
-            
+
         if self.graph.isDirected():
             result += "in = ("
             for edge in self.inEdges.values():
-                result += edge.label + ", "                
+                result += edge.label + ", "
             if len(self.inEdges) != 0:
                 result = result[:-2]
             result += "), out = (" + cont + ")"
         else:
             result += cont
         return result + "]"
-               
+
 class Edge:
     """
       ___    _          
@@ -99,27 +123,27 @@ class Edge:
      |___\__,_\__, \___|
               |___/    
     """
-    
-    def __init__(self, startVertex: Vertex, endVertex: Vertex, label: str, wage: float = 1.0):
+
+    def __init__(self, startVertex: Vertex, endVertex: Vertex, label: str, weight: float = 1.0):
         assert startVertex.graph == endVertex.graph
         self.label = label
-        self.wage: float = wage
+        self.weight: float = weight
         self.startVertex: Vertex = startVertex
         self.endVertex: Vertex = endVertex
         self.startVertex.outEdges.update({label: self})
         self.endVertex.inEdges.update({label: self})
-        
+
     def getGraph(self):
         assert self.startVertex.graph == self.endVertex.graph
         return self.startVertex.getGraph()
-    
+
     def removeMe(self):
         return self.getGraph().removeEdge(self)
 
     def getLabel(self):
         return self.label
 
-    def opposideVertex(self, vertex: Vertex):
+    def oppositeVertex(self, vertex: Vertex):
         """
         Zwraca wierzchołek po przeciwnej stronie krawędzi, niż ten podany w parametrze.
         Jako parametr przyjmuje referencję do wierzchołka lub jego etykietę.
@@ -128,21 +152,27 @@ class Edge:
         if vertex == self.startVertex or vertex == self.startVertex.label:
             return self.endVertex
         return self.startVertex
-    
+
     def equals(self, another):
         if not isinstance(another, Edge):
             return False
         if self.label != another.label:
             return False
-        if self.startVertex.label != another.startVertex.label or self.endVertex.label != another.endVertex.label:
-            return False
-        if self.wage != another.wage:
+        if self.getGraph().isDirected() and (self.startVertex.label != another.startVertex.label or self.endVertex.label != another.endVertex.label):
+            return False        
+        if (not self.getGraph().isDirected()) and (self.startVertex.label != another.startVertex.label or self.endVertex.label != another.endVertex.label) and (self.startVertex.label != another.endVertex.label or self.endVertex.label != another.startVertex.label):
+            return False                
+        if self.weight != another.weight:
             return False
         return True
-    
+
     def __str__(self):
-        return "(" + self.label + ": " + self.startVertex.label + " -> " + self.endVertex.label + (", wage = " + str(self.wage) if self.wage != 1.0 else "") + ")"
-        
+        return "(" + self.label + ": " + self.startVertex.label + " -> " + self.endVertex.label + (", weight = " + str(self.weight) if self.weight != 1.0 else "") + ")"
+        #return (f"({self.label}: {self.startVertex.label} -> {self.endVertex.label}"
+                #+ f", weight = {self.weight}" if self.weight != 1.0 else ""
+                #)
+
+
 class Graph:
     """
        ___               _    
@@ -151,7 +181,7 @@ class Graph:
       \___|_| \__,_| .__/_||_|
                    |_|      
     """
-    
+
     def __init__(self, directed: bool = False):
         self.vertexIndex = {}
         self.edgeIndex = {}
@@ -159,24 +189,24 @@ class Graph:
         self.__edgeProposalNameNumber: int = 0
         self.__directed = directed
         self.__numberOfVertexes: int = 0
-        
+
     def isDirected(self):
         return self.__directed
-        
+
     def proposalVertexName(self):
         while True:
             self.__vertexProposalNameNumber = self.__vertexProposalNameNumber + 1
             name: str = "v" + str(self.__vertexProposalNameNumber)
             if self.vertexIndex.get(name, None) == None:
                 return name
-    
+
     def proposalEdgeName(self):
         while True:
             self.__edgeProposalNameNumber = self.__edgeProposalNameNumber + 1
             name: str = "e" + str(self.__edgeProposalNameNumber)
             if self.edgeIndex.get(name, None) == None:
                 return name
-        
+
     def getVertex(self, label: str):
         """
         Zwraca referencję do wierzchołka na podstawie etykiety.
@@ -197,7 +227,7 @@ class Graph:
         self.vertexIndex.update({label: newVertex})
         self.__numberOfVertexes += 1
         return newVertex
-        
+
     def getOrAddVertex(self, label: str):
         """
         Zwraca wierzchołek o podanej nazwie, a jeśli nie istnieje, to zostaje dodany.
@@ -206,7 +236,7 @@ class Graph:
         if vertex == None:
             vertex = self.addVertex(label)
         return vertex
-        
+
     def removeVertex(self, vertex):
         """
         Usuwa wierzhołek. 
@@ -234,14 +264,14 @@ class Graph:
             "inputDegree" i "outputDegree" dla grafu skierowanego (inputDegree = outputDegree = degree dla nieskierowanego)
         """
         for vertex in self.vertexIndex.values():
-            vertex.degree: int = 0
-            vertex.inputDegree: int = 0
-            vertex.outputDegree: int = 0
-            
+            vertex.degree = 0
+            vertex.inputDegree = 0
+            vertex.outputDegree = 0
+
         for edge in self.edgeIndex.values():
             edge.startVertex.degree += 1
             edge.endVertex.degree += 1
-        
+
         if self.isDirected():
             for edge in self.edgeIndex.values():
                 edge.startVertex.outputDegree += 1
@@ -250,16 +280,14 @@ class Graph:
             for vertex in self.vertexIndex.values():
                 vertex.inputDegree = vertex.degree
                 vertex.outputDegree = vertex.degree
-                        
-    
     def getEdge(self, label: str):
         """
         Zwraca referencję do krawędzi na podstawie etykiety.
         Jeżeli krawędź nie istnieje, zwraca None.
         """
         return self.edgeIndex.get(label, None)
-    
-    def addEdge(self, startVertex, endVertex, label: str = None, wage: float = 1.0):
+
+    def addEdge(self, startVertex, endVertex, label: str = None, weight: float = 1.0):
         """
         Tworzy nową krawędź.
         Jako parametry przyjmuje referencje do wierzchołków, lub ich etykiety.
@@ -271,17 +299,17 @@ class Graph:
         if isinstance(startVertex, str):
             startVertex = self.getVertex(startVertex)
         if isinstance(endVertex, str):
-            endVertex = self.getVertex(endVertex)            
+            endVertex = self.getVertex(endVertex)
         if startVertex == None or endVertex == None:
             raise Exception("Vertex not found", startVertex, endVertex)
-        newEdge: Egde = Edge(startVertex, endVertex, label, wage)
+        newEdge: Edge = Edge(startVertex, endVertex, label, weight)
         self.edgeIndex.update({label: newEdge})
-        startVertex.degree += 1 
-        endVertex.degree += 1 
-        startVertex.outputDegree += 1 
-        endVertex.inputDegree += 1 
+        startVertex.degree += 1
+        endVertex.degree += 1
+        startVertex.outputDegree += 1
+        endVertex.inputDegree += 1
         return newEdge
-        
+
     def removeEdge(self, edge):
         """
         Usuwa krawędź. 
@@ -294,13 +322,27 @@ class Graph:
         edge.startVertex.outEdges.pop(edge.label)
         edge.endVertex.inEdges.pop(edge.label)
         self.edgeIndex.pop(edge.label)
-        edge.startVertex.degree -= 1 
-        edge.endVertex.degree -= 1 
-        edge.startVertex.outputDegree -= 1 
-        edge.endVertex.inputDegree -= 1 
+        edge.startVertex.degree -= 1
+        edge.endVertex.degree -= 1
+        edge.startVertex.outputDegree -= 1
+        edge.endVertex.inputDegree -= 1
         del edge
         return True
-    
+
+    def removeDuplicatedEdges(self):
+        """
+        Usuwa nadmiarowe krawędzie, jeżeli między dwoma wierzchołkami 
+        jest więcej niż jedna w tym samym kierunku.
+        """
+        for vertex in self.vertexIndex.values():
+            adjacent = set(edge.endVertex for edge in vertex.outEdges.values())
+            for edge in vertex.outEdges.copy().values():
+                if edge.endVertex in adjacent:
+                    adjacent.remove(edge.endVertex)
+                else:
+                    edge.removeMe()     
+
+
     def findEdges(self, startVertex, endVertex, oneElementList: bool = False):
         """
         Znajduje wszystkie krawędzie pomiędzy dwoma wierzchołkami.
@@ -309,10 +351,12 @@ class Graph:
         if isinstance(startVertex, str):
             startVertex = self.getVertex(startVertex)
         if isinstance(endVertex, str):
-            endVertex = self.getVertex(endVertex)            
+            endVertex = self.getVertex(endVertex)
         if startVertex == None or endVertex == None:
             raise Exception("Vertex not found", startVertex, endVertex)
-        labels = set(startVertex.outEdges.keys()).intersection(set(endVertex.inEdges.keys()))
+        edges = set(startVertex.outEdges.values()).intersection(set(endVertex.inEdges.values()))
+        labels = {edge.label for edge in edges if edge.startVertex == startVertex and edge.endVertex == endVertex} if self.isDirected() else {edge.label for edge in edges if (edge.startVertex == startVertex and edge.endVertex == endVertex) or (edge.startVertex == endVertex and edge.endVertex == startVertex)}
+        #labels = set(startVertex.outEdges.keys()).intersection(set(endVertex.inEdges.keys()))
         result = [self.getEdge(label) for label in labels]
         if not oneElementList:
             if len(result) == 1:
@@ -320,7 +364,7 @@ class Graph:
             elif len(result) == 0:
                 return None
         return result
-    
+
     def addCompositional(self, another):
         """
         Łączy dwa grafy w jeden (dodaje nowe spójne składowe).
@@ -328,15 +372,15 @@ class Graph:
         for label in another.vertexIndex:
             self.addVertex(label)
         for edge in another.edgeIndex.values():
-            self.addEdge(edge.startVertex.label, edge.endVertex.label, edge.label, edge.wage)
+            self.addEdge(edge.startVertex.label, edge.endVertex.label, edge.label, edge.weight)
         return self
-        
+
     def copy(self):
         """
         Tworzy czystą kopię strukturalną grafu.
         """
         return Graph(self.isDirected()).addCompositional(self)
-    
+
     def equals(self, another):
         """
         Porównuje strukturalnie dwa grafy.
@@ -356,7 +400,7 @@ class Graph:
             if not edge.equals(another.getEdge(edge.label)):
                 return False
         return True
-    
+
     def takeVertexesDown(self, vertexA, vertexB, newLabel: str = None):
         """
         Ściąga dwa wierzchołki w jeden. Usuwa krawędzie pomiędzy tymi wierzchołkami. 
@@ -378,17 +422,17 @@ class Graph:
         newVertex.outEdges.update(vertexB.outEdges)
         for edge in set(newVertex.inEdges.values()).union(set(newVertex.outEdges.values())):
             if edge.startVertex == vertexA or edge.startVertex == vertexB:
-               edge.startVertex = newVertex                         
+                edge.startVertex = newVertex
             if edge.endVertex == vertexA or edge.endVertex == vertexB:
-               edge.endVertex = newVertex
-               
+                edge.endVertex = newVertex
+
         self.vertexIndex.pop(vertexA.label, None)
         self.vertexIndex.pop(vertexB.label, None)
         del vertexA
         del vertexB
         newVertex.calcDegree()
         return newVertex
-    
+
     def takeEdgeDown(self, edge, newVertexLabel: str):
         """
         Ściąga krawędź. Usuwa wszystkie pozostałe krawędzie między wierzchołkami tej krawędzi.
@@ -399,23 +443,23 @@ class Graph:
         if edge == None:
             raise Exception("Invalid edge", edge)
         return self.takeVertexesDown(edge.startVertex, edge.endVertex, newVertexLabel)
-    
+
     def __str__(self):
         """
         Konwertuje graf na czytelną reprezentację tekstową.
         """
         result = ""
         for vertex in self.vertexIndex.values():
-            result += str(vertex) + ", "                         
+            result += str(vertex) + ", "
         if len(self.vertexIndex) != 0:
             result = result[:-2]
         result += "; "
         for edge in self.edgeIndex.values():
-            result += str(edge) + ", "                    
+            result += str(edge) + ", "
         if len(self.edgeIndex) != 0:
             result = result[:-2]
         return "{" + result + "}"
-    
+
     def createAdjacencyMatrix(self):
         """
         Tworzy macierz sąsiedztwa.
@@ -423,12 +467,12 @@ class Graph:
         """
         vertexList = self.vertexIndex.values()
         vertexLabelList = [vertex.label for vertex in vertexList]
-        matrix = [[0.0 for i in vertexList] for j in vertexList] 
+        matrix = [[0.0 for i in vertexList] for j in vertexList]
         for i, vertex1 in enumerate(vertexList):
             for j, vertex2 in enumerate(vertexList):
-                matrix[i][j] += sum(edge.wage for edge in self.findEdges(vertex1, vertex2, True))                
+                matrix[i][j] += sum(edge.weight for edge in self.findEdges(vertex1, vertex2, True))       
         return (vertexLabelList, matrix)
-    
+
     def loadAdjacencyMatrix(self, matrix):
         """
         Dodaje strukturę z macierzy sąsiedztwa.
@@ -443,39 +487,47 @@ class Graph:
             matrix = matrix[1]
         else:
             labels = [self.proposalVertexName() for i in range(len(matrix))]
-            
+
         for label in labels:
             self.addVertex(label)
-        
         for i, vertex1 in enumerate(self.vertexIndex.values()):
             for j, vertex2 in enumerate(self.vertexIndex.values()):
-                if matrix[i][j] != 0:
-                    self.addEdge(vertex1, vertex2, wage=matrix[i][j])
                 if (not self.isDirected()) and (j > i):
-                    break        
+                    break
+                if matrix[i][j] != 0:
+                    self.addEdge(vertex1, vertex2, weight=matrix[i][j])
         return self
-    
+
     def createAdjacencyList(self):
         """
         Tworzy listę sąsiedztwa.
         """
         result = []
-        for edge in self.edgeIndex.values():
-            result.append((edge.label, edge.startVertex.label, edge.endVertex.label, edge.wage)) 
+        for v in self.vertexIndex.values():
+            edges = v.getOutEdges()
+            adjacencies = [] # lista przyległych wierzchołków
+            for e in edges.values():
+                    opposite = e.oppositeVertex(v)
+                    adjacencies.append(opposite.getLabel())
+            result.append((v.getLabel(), adjacencies))
         return result
-    
+
     def loadAdjacencyList(self, dataList):
         """
         Dodaje strukturę z listy sąsiedztwa.
         Nie sprawdza poprawnośc zapisu.
         Przyjmuje listę w formacie wygenerowanycm przez createAdjacencyList().
         """
-        for record in dataList:
-            vertex1 = self.getOrAddVertex(record[1])
-            vertex2 = self.getOrAddVertex(record[2])
-            self.addEdge(vertex1, vertex2, label=record[0], wage=record[3])
+
+        for i in dataList:
+            outVertex = self.getOrAddVertex(i[0])
+            for v in i[1]:
+                inVertex = self.getOrAddVertex(v)
+                if self.isDirected() or outVertex.label > inVertex.label:
+                    self.addEdge(outVertex, inVertex)
+
         return self
-    
+
     def createIncidenceMatrix(self):
         """
         Tworzy macierz incydencji.
@@ -485,13 +537,13 @@ class Graph:
         vertexLabelList = [vertex.label for vertex in vertexList]
         edgeList = self.edgeIndex.values()
         edgeLabelList = [edge.label for edge in edgeList]
-        matrix = [{label: 0 for label in vertexLabelList} for j in edgeList] 
+        matrix = [{label: 0 for label in vertexLabelList} for j in edgeList]
         negV: int = -1 if self.isDirected() else 1
         for i, edge in enumerate(edgeList):
-            matrix[i].update({edge.startVertex.label: 1, edge.endVertex.label: negV})   
-        resultMatrix = [list(col.values()) for col in matrix] 
+            matrix[i].update({edge.startVertex.label: 1, edge.endVertex.label: negV})
+        resultMatrix = [list(col.values()) for col in matrix]
         return (edgeLabelList, vertexLabelList, resultMatrix)
-        
+
     def loadIncidenceMatrix(self, data):
         """
         Dodaje strukturę z macierzy incydencji.
@@ -518,7 +570,52 @@ class Graph:
                 if endVertex == None and cell == negV:
                     endVertex = vertexList[j]
             self.addEdge(startVertex, endVertex, edgeLabelList[i]);
-        return self  
+        return self
+
+    def printAdjacencyList(self):
+        adjList = self.createAdjacencyList()
+        outStr = ""
+        for i in adjList:
+            outStr += i[0] + ": "
+            for j in i[1]:
+                outStr += j + " "
+            outStr += "\n"
+
+        print(outStr)
+        return outStr
+
+    def printAdjacencyMatrix(self):
+        adjMatrix = self.createAdjacencyMatrix()
+        outStr = ""
+        for nr, i in enumerate(adjMatrix[1]):
+            outStr += "v" + str(nr+1) + ": "
+            for j in i:
+                outStr += str(j) + " "
+            outStr += "\n"
+        print(outStr)
+        return outStr
+
+    def printIncidenceMatrix(self):
+        inMatrix = self.createIncidenceMatrix()
+        edges = inMatrix[0]
+        vertices = inMatrix[1]
+        matrix = inMatrix[2]
+        outStr = "   "
+        for v in vertices:
+            outStr += v + " "
+        outStr += "\n"
+        for i in range(len(edges)):
+            outStr += edges[i] + " "
+            for j in range(len(vertices)):
+                outStr += str(matrix[i][j]) + "  "
+            outStr += "\n"
+
+        print(outStr)
+        return outStr
+
+
+    def getVertexIndex(self):
+        return self.vertexIndex
 
     @staticmethod
     def generateRandomGraph(n, l, directed: bool = False):
@@ -530,10 +627,10 @@ class Graph:
         g = Graph(directed)
         for _ in range(n):
             g.addVertex()
-        
+
         vertexList = g.vertexIndex.values()
         vertexLabelList = [vertex.label for vertex in vertexList]
-        
+
         for _ in range(l):
             vertexLabelListCopy = vertexLabelList.copy()
             v1 = vertexLabelListCopy.pop(random.randrange(len(vertexLabelList)))
@@ -568,13 +665,59 @@ class Graph:
 
         return g
 
+    def components(self):
+        """
+        Algorytm oznaczający spójne składowe.
+        Zwraca listę krotek (nr skladowej, wierzcholek)
+        """
+        nr = 0 # nr spójnej składowej
+
+        vertices = self.vertexIndex.values()
+
+        comp = [] 
+        for v in vertices:
+            comp.append([-1, v]) # wszystkie wierzchołki są nieodwiedzone
+
+        for v in comp:
+            if v[0] == -1:
+                nr += 1
+                v[0] = nr # oznaczamy v jako odwiedzony i należący do spójnej składowej nr
+                comp = Graph.components_R(nr, v[1], self, comp)
+        
+        thegreatestcompList = []
+
+        comp_nums = [i[0] for i in comp]
+        thegreatestcomp = max(set(comp_nums), key = comp_nums.count)
+
+        for i in comp:
+            if i[0] == thegreatestcomp:
+                thegreatestcompList.append(i[1].getLabel())
+                
+        return comp, thegreatestcompList
+
+    @staticmethod
+    def components_R(nr, v, g, comp):
+        """
+        Rekursywne przeszukiwanie w głąb
+        """
+        comp[2][0] = 2
+        for u in v.adjacentVertices(): # przeglądamy sąsiadów
+            try:
+                idx = comp.index([-1, u])
+                if comp[idx][0] == -1:
+                    comp[idx][0] = nr
+                    Graph.components_R(nr, comp[idx][1], g, comp)
+            except ValueError:
+                continue
+
+        return comp
+
 #  _____       _      
 # |_   _|__ __| |_ ___
 #   | |/ -_|_-<  _(_-<
 #   |_|\___/__/\__/__/                
 
 def testDirectionalGraph():
-    
     g = Graph(True)
     assert g != None
     assert g.addVertex(g.proposalVertexName()).label == "v1"
@@ -582,16 +725,16 @@ def testDirectionalGraph():
     assert g.addVertex(g.proposalVertexName()).label == "v3"
     assert g.addEdge("v1", "v2").label == "e1"
     assert g.addEdge("v2", "v3").label == "e2"
-    assert g.addEdge("v3", "v1", wage = 1.1).label == "e3"
-    assert g.addEdge("v2", "v1", wage = 1).label == "e4"
+    assert g.addEdge("v3", "v1", weight=1.1).label == "e3"
+    assert g.addEdge("v2", "v1", weight=1).label == "e4"
     assert g.equals(g)
     print(g.createAdjacencyMatrix())
     print(g.createAdjacencyList())
     print(g.createIncidenceMatrix())
     assert str(g) != None
     print(g)
-    assert g.getEdge("e1").opposideVertex("v1").label == "v2"
-    assert g.getEdge("e1").opposideVertex("v2").label == "v1"
+    assert g.getEdge("e1").oppositeVertex("v1").label == "v2"
+    assert g.getEdge("e1").oppositeVertex("v2").label == "v1"
     g2 = g.copy()
     assert g.equals(g2)
     assert g2.equals(g)
@@ -607,9 +750,9 @@ def testDirectionalGraph():
     assert g.getVertex("v1").removeMe()
     assert len(g.vertexIndex) == 2
     assert len(g.edgeIndex) == 1
-    
+
+
 def testUndirectionalGraph():
-    
     g = Graph(False)
     assert g != None
     assert g.addVertex(g.proposalVertexName()).label == "v1"
@@ -618,8 +761,8 @@ def testUndirectionalGraph():
     assert g.addEdge("v1", "v2").label == "e1"
     assert g.addEdge("v2", "v3").label == "e2"
     assert g.addEdge("v3", "v1").label == "e3"
-    assert g.getEdge("e1").opposideVertex("v1").label == "v2"
-    assert g.getEdge("e1").opposideVertex("v2").label == "v1"
+    assert g.getEdge("e1").oppositeVertex("v1").label == "v2"
+    assert g.getEdge("e1").oppositeVertex("v2").label == "v1"
     assert g.equals(g)
     print(g.createAdjacencyMatrix())
     print(g.createAdjacencyList())
@@ -642,6 +785,7 @@ def testUndirectionalGraph():
     assert g.removeVertex("v1")
     assert len(g.vertexIndex) == 2
     assert len(g.edgeIndex) == 1
+
 
 def testUndirectionalGraphDrawing():
     g = Graph(False)
@@ -669,7 +813,8 @@ def testUndirectionalGraphDrawing():
     assert g.addEdge("v3", "v7").label == "e12"
     drawGraph.drawVertexes(g, 3, 'test1.png')
 
-def testTakeDownDirectional():    
+
+def testTakeDownDirectional():
     g = Graph(True)
     assert g != None
     assert g.addVertex(g.proposalVertexName()).label == "v1"
@@ -682,7 +827,7 @@ def testTakeDownDirectional():
     assert g.getVertex("v1").degree == 3
     assert g.getVertex("v2").degree == 3
     assert g.getVertex("v3").degree == 2
-    
+
     print(g)
     assert g.takeEdgeDown("e2", "newV").label == "newV"
     print(g)
@@ -691,31 +836,32 @@ def testTakeDownDirectional():
     assert g.getEdge("e2") == None
     assert g.getVertex("v2") == None
     assert g.getVertex("v3") == None
-    
+
     assert g.getVertex("v1").degree == 3
     assert g.getVertex("newV").degree == 3
-        
+
     assert g.getEdge("e1").endVertex.label == "newV"
     assert g.getEdge("e3").startVertex.label == "newV"
     assert g.getEdge("e4").startVertex.label == "newV"
-    
+
     assert g.getEdge("e1").startVertex.label != "v2"
     assert g.getEdge("e1").startVertex.label != "v3"
     assert g.getEdge("e3").startVertex.label != "v2"
     assert g.getEdge("e3").startVertex.label != "v3"
     assert g.getEdge("e4").startVertex.label != "v2"
     assert g.getEdge("e4").startVertex.label != "v3"
-    
+
     assert g.getEdge("e1").endVertex.label != "v2"
     assert g.getEdge("e1").endVertex.label != "v3"
     assert g.getEdge("e3").endVertex.label != "v2"
     assert g.getEdge("e3").endVertex.label != "v3"
     assert g.getEdge("e4").endVertex.label != "v2"
     assert g.getEdge("e4").endVertex.label != "v3"
-    
+
     assert g.equals(g)
-    
-def testTakeDownUndirectional():    
+
+
+def testTakeDownUndirectional():
     g = Graph(False)
     assert g != None
     assert g.addVertex(g.proposalVertexName()).label == "v1"
@@ -728,7 +874,7 @@ def testTakeDownUndirectional():
     assert g.getVertex("v1").degree == 3
     assert g.getVertex("v2").degree == 3
     assert g.getVertex("v3").degree == 2
-    
+
     print(g)
     assert g.takeEdgeDown("e2", "newV").label == "newV"
     print(g)
@@ -737,111 +883,171 @@ def testTakeDownUndirectional():
     assert g.getEdge("e2") == None
     assert g.getVertex("v2") == None
     assert g.getVertex("v3") == None
-    
+
     assert g.getVertex("v1").degree == 3
     assert g.getVertex("newV").degree == 3
-        
+
     assert g.getEdge("e1").endVertex.label == "newV"
     assert g.getEdge("e3").startVertex.label == "newV"
     assert g.getEdge("e4").startVertex.label == "newV"
-    
+
     assert g.getEdge("e1").startVertex.label != "v2"
     assert g.getEdge("e1").startVertex.label != "v3"
     assert g.getEdge("e3").startVertex.label != "v2"
     assert g.getEdge("e3").startVertex.label != "v3"
     assert g.getEdge("e4").startVertex.label != "v2"
     assert g.getEdge("e4").startVertex.label != "v3"
-    
+
     assert g.getEdge("e1").endVertex.label != "v2"
     assert g.getEdge("e1").endVertex.label != "v3"
     assert g.getEdge("e3").endVertex.label != "v2"
     assert g.getEdge("e3").endVertex.label != "v3"
     assert g.getEdge("e4").endVertex.label != "v2"
-    assert g.getEdge("e4").endVertex.label != "v3"    
-    
+    assert g.getEdge("e4").endVertex.label != "v3"
+
     assert g.equals(g)
 
+
 def testLoaders():
-    g = Graph(True)
-    assert g != None
-    assert g.addVertex(g.proposalVertexName()).label == "v1"
-    assert g.addVertex(g.proposalVertexName()).label == "v2"
-    assert g.addVertex(g.proposalVertexName()).label == "v3"
-    assert g.addEdge("v1", "v2").label == "e1"
-    assert g.addEdge("v2", "v3").label == "e2"
-    assert g.addEdge("v3", "v1").label == "e3"
+    for direction in [True, False]:
+        g = Graph(direction)
+        assert g != None
+        assert g.addVertex(g.proposalVertexName()).label == "v1"
+        assert g.addVertex(g.proposalVertexName()).label == "v2"
+        assert g.addVertex(g.proposalVertexName()).label == "v3"
+        assert g.addEdge("v1", "v2").label == "e1"
+        assert g.addEdge("v2", "v3").label == "e2"
+        assert g.addEdge("v3", "v1").label == "e3"
+        
+        g1 = Graph(direction).loadAdjacencyMatrix(g.createAdjacencyMatrix())
+        g2 = Graph(direction).loadAdjacencyMatrix(g1.createAdjacencyMatrix())
+        assert g1.equals(g2)        
+        if direction: 
+            assert g.equals(g1)
+            assert g.equals(g2)
+        
+        g1 = Graph(direction).loadAdjacencyList(g.createAdjacencyList())
+        g2 = Graph(direction).loadAdjacencyList(g1.createAdjacencyList())
+        assert g1.equals(g2)
+        if direction: 
+            assert g.equals(g1)
+            assert g.equals(g2)
+        
+        g1 = Graph(direction).loadIncidenceMatrix(g.createIncidenceMatrix())
+        g2 = Graph(direction).loadIncidenceMatrix(g1.createIncidenceMatrix())
+        assert g1.equals(g2)
+        if direction: 
+            assert g.equals(g1)
+            assert g.equals(g2)
+        
+        
+        g1 = Graph(direction).loadAdjacencyMatrix(g.createAdjacencyMatrix()[1])
+        g2 = Graph(direction).loadAdjacencyMatrix(g1.createAdjacencyMatrix()[1])
+        assert g1.equals(g2)
+        if direction: 
+            assert g.equals(g1)
+            assert g.equals(g2)
+        
+        g1 = Graph(direction).loadIncidenceMatrix(g.createIncidenceMatrix()[2])
+        g2 = Graph(direction).loadIncidenceMatrix(g1.createIncidenceMatrix()[2])
+        assert g1.equals(g2)
+        if direction: 
+            assert g.equals(g1)
+            assert g.equals(g2)
+
+def testTextLoaders():
+    g = Graph(directed=False)
+    for _ in range(6):
+        g.addVertex()
+    g.addEdge("v1", "v2")
+    g.addEdge("v3", "v4")
+    g.addEdge("v4", "v5")
+    g.addEdge("v5", "v3")
+    g.addEdge("v6", "v3")
+    g.addEdge("v1", "v3")
+    drawGraph.drawVertexes(g, 4, 'testText.png')
+
+    g.printAdjacencyList()
+    g.printAdjacencyMatrix()
+    g.printIncidenceMatrix()
+
+
     
-    g1 = Graph(True).loadAdjacencyMatrix(g.createAdjacencyMatrix())
-    g2 = Graph(True).loadAdjacencyMatrix(g1.createAdjacencyMatrix())
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
-    
-    g1 = Graph(True).loadAdjacencyList(g.createAdjacencyList())
-    g2 = Graph(True).loadAdjacencyList(g1.createAdjacencyList())
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
-    
-    g1 = Graph(True).loadIncidenceMatrix(g.createIncidenceMatrix())
-    g2 = Graph(True).loadIncidenceMatrix(g1.createIncidenceMatrix())
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
-    
-    
-    g1 = Graph(True).loadAdjacencyMatrix(g.createAdjacencyMatrix()[1])
-    g2 = Graph(True).loadAdjacencyMatrix(g1.createAdjacencyMatrix()[1])
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
-    
-    g1 = Graph(True).loadIncidenceMatrix(g.createIncidenceMatrix()[2])
-    g2 = Graph(True).loadIncidenceMatrix(g1.createIncidenceMatrix()[2])
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
 
 def testRandomGraphGenerator():
-    g = Graph.generateRandomGraph(4, 7, directed=False)
+    g = Graph.generateRandomGraph(10, 15, directed=False)
     drawGraph.drawVertexes(g, 3, 'random.png')
     print("Generated graph:")
+    # drawGraph.drawVertexes(g, 3, 'g.png')
     print(g)
 
     g2 = Graph.generateRandomGraphProbability(5, 0.5, directed=False)
     print("Generated graph:")
     print(g2)
+
+def testComponents():
+    g = Graph(directed=False)
+    for _ in range(11):
+        g.addVertex()
+
+    g.addEdge("v1", "v2")
+    g.addEdge("v1", "v3")
+    g.addEdge("v1", "v4")
+    g.addEdge("v1", "v5")
+    g.addEdge("v1", "v6")
+    g.addEdge("v1", "v7")
+    g.addEdge("v2", "v3")
+    g.addEdge("v2", "v6")
+    g.addEdge("v2", "v7")
+    g.addEdge("v3", "v6")
+    g.addEdge("v4", "v7")
+    g.addEdge("v5", "v11")
     
-def test():
+    g.addEdge("v8", "v9")
+    g.addEdge("v8", "v10")
+    g.addEdge("v9", "v10")
+
+    g.components()
+
+
+
+def test():    
     print("Testing...")
-    
+
     testDirectionalGraph()
     testUndirectionalGraph()
     testTakeDownDirectional()
     testTakeDownUndirectional()
     testLoaders()
+    testTextLoaders()
     testRandomGraphGenerator()
     testUndirectionalGraphDrawing()
+    testComponents()
     
     print("Done.")
 
-def generateDocumentation(moduleName: str = "graphes"):
+
+def generateDocumentation(moduleName: str = "graphs"):
     try:
         print("Generating documentation...")
-        from sys import platform      
+        from sys import platform
         from os import system as shell
-        if platform == "linux" or platform == "linux2":      
-            shell("pydoc3 '" + moduleName + "' | head -n -5 > '" + moduleName + "_documentation.txt'")  
-        shell("pydoc3 -w '" + moduleName + "'") 
+        if platform == "linux" or platform == "linux2":
+            shell("pydoc3 '" + moduleName + "' | head -n -5 > '" + moduleName + "_documentation.txt'")
+        shell("pydoc3 -w '" + moduleName + "'")
         return False
     except:
         return False
 
-# __  __      _      
+
+# __  __      _
 # |  \/  |__ _(_)_ _  
 # | |\/| / _` | | ' \ 
 # |_|  |_\__,_|_|_||_|
-                            
+
 if __name__ == "__main__":
+    import drawGraph
     test()
     generateDocumentation()
+
+    

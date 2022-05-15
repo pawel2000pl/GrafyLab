@@ -1,14 +1,7 @@
-Help on module graphes:
+Help on module graphs:
 
 NAME
-    graphes
-
-DESCRIPTION
-    ___               _           
-     / __|_ _ __ _ _ __| |_  ___ ___
-    | (_ | '_/ _` | '_ \ ' \/ -_|_-<
-     \___|_| \__,_| .__/_||_\___/__/
-                  |_|
+    graphs
 
 CLASSES
     builtins.object
@@ -17,7 +10,7 @@ CLASSES
         Vertex
     
     class Edge(builtins.object)
-     |  Edge(startVertex: graphes.Vertex, endVertex: graphes.Vertex, label: str, wage: float = 1.0)
+     |  Edge(startVertex: graphs.Vertex, endVertex: graphs.Vertex, label: str, weight: float = 1.0)
      |  
      |   ___    _          
      |  | __|__| |__ _ ___ 
@@ -27,7 +20,7 @@ CLASSES
      |  
      |  Methods defined here:
      |  
-     |  __init__(self, startVertex: graphes.Vertex, endVertex: graphes.Vertex, label: str, wage: float = 1.0)
+     |  __init__(self, startVertex: graphs.Vertex, endVertex: graphs.Vertex, label: str, weight: float = 1.0)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |  
      |  __str__(self)
@@ -37,7 +30,9 @@ CLASSES
      |  
      |  getGraph(self)
      |  
-     |  opposideVertex(self, vertex: graphes.Vertex)
+     |  getLabel(self)
+     |  
+     |  oppositeVertex(self, vertex: graphs.Vertex)
      |      Zwraca wierzchołek po przeciwnej stronie krawędzi, niż ten podany w parametrze.
      |      Jako parametr przyjmuje referencję do wierzchołka lub jego etykietę.
      |      Używać w przypadku wędrówek po grafach nieskierowanych.
@@ -73,7 +68,7 @@ CLASSES
      |  addCompositional(self, another)
      |      Łączy dwa grafy w jeden (dodaje nowe spójne składowe).
      |  
-     |  addEdge(self, startVertex, endVertex, label: str = None, wage: float = 1.0)
+     |  addEdge(self, startVertex, endVertex, label: str = None, weight: float = 1.0)
      |      Tworzy nową krawędź.
      |      Jako parametry przyjmuje referencje do wierzchołków, lub ich etykiety.
      |  
@@ -87,6 +82,10 @@ CLASSES
      |      Wynik znajduje się w nowo powstałym polu każdego wierzchołka:
      |          "degree" dla grafu nieskierowanego (degree = inputDegree + outputDegree dla skierowanego),
      |          "inputDegree" i "outputDegree" dla grafu skierowanego (inputDegree = outputDegree = degree dla nieskierowanego)
+     |  
+     |  components(self)
+     |      Algorytm oznaczający spójne składowe.
+     |      Zwraca listę krotek (nr skladowej, wierzcholek)
      |  
      |  copy(self)
      |      Tworzy czystą kopię strukturalną grafu.
@@ -113,12 +112,16 @@ CLASSES
      |      Zwraca referencję do krawędzi na podstawie etykiety.
      |      Jeżeli krawędź nie istnieje, zwraca None.
      |  
+     |  getNumberOfVertexes(self)
+     |  
      |  getOrAddVertex(self, label: str)
      |      Zwraca wierzchołek o podanej nazwie, a jeśli nie istnieje, to zostaje dodany.
      |  
      |  getVertex(self, label: str)
      |      Zwraca referencję do wierzchołka na podstawie etykiety.
      |      Jeżeli wierzchołek nie istnieje, zwraca None.
+     |  
+     |  getVertexIndex(self)
      |  
      |  isDirected(self)
      |  
@@ -141,6 +144,12 @@ CLASSES
      |      Przyjmuje krotkę wygenerowaną przez createIncidenceMatrix(),
      |      lub samą macierz (trzeci element krotki).
      |  
+     |  printAdjacencyList(self)
+     |  
+     |  printAdjacencyMatrix(self)
+     |  
+     |  printIncidenceMatrix(self)
+     |  
      |  proposalEdgeName(self)
      |  
      |  proposalVertexName(self)
@@ -160,6 +169,22 @@ CLASSES
      |  takeVertexesDown(self, vertexA, vertexB, newLabel: str = None)
      |      Ściąga dwa wierzchołki w jeden. Usuwa krawędzie pomiędzy tymi wierzchołkami. 
      |      Zwraca nowy wierzchołek.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods defined here:
+     |  
+     |  components_R(nr, v, g, comp)
+     |      Rekursywne przeszukiwanie w głąb
+     |  
+     |  generateRandomGraph(n, l, directed: bool = False)
+     |      Generuje losowy graf, gdzie
+     |      n - liczba wierzchołków grafu
+     |      l - liczba krawędzi grafu
+     |  
+     |  generateRandomGraphProbability(n, p, directed: bool = False)
+     |      Generuje losowy graf, gdzie
+     |      n - liczba wierzchołków grafu
+     |      p - prawdopodobieństwo, że pomiędzy dwoma wierzchołkami istnieje krawędź
      |  
      |  ----------------------------------------------------------------------
      |  Data descriptors defined here:
@@ -186,6 +211,10 @@ CLASSES
      |  __str__(self)
      |      Return str(self).
      |  
+     |  adjacentVertices(self)
+     |      Zwraca listę wierzchołków przyległych.
+     |      Tylko dla grafów nieskierowanych.
+     |  
      |  allEdgesList(self)
      |  
      |  allEdgesSet(self)
@@ -200,6 +229,12 @@ CLASSES
      |  
      |  getGraph(self)
      |  
+     |  getInEdges(self)
+     |  
+     |  getLabel(self)
+     |  
+     |  getOutEdges(self)
+     |  
      |  removeMe(self)
      |  
      |  ----------------------------------------------------------------------
@@ -212,16 +247,24 @@ CLASSES
      |      list of weak references to the object (if defined)
 
 FUNCTIONS
-    generateDocumentation(moduleName: str = 'graphes')
+    generateDocumentation(moduleName: str = 'graphs')
     
     test()
+    
+    testComponents()
     
     testDirectionalGraph()
     
     testLoaders()
     
+    testRandomGraphGenerator()
+    
     testTakeDownDirectional()
     
     testTakeDownUndirectional()
     
+    testTextLoaders()
+    
     testUndirectionalGraph()
+    
+    testUndirectionalGraphDrawing()

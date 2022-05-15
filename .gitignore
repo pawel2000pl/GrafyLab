@@ -128,3 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .directory
+
+*.pnggraphs_documentation.txt
+graphs.html
+*.png
