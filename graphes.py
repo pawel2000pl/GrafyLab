@@ -731,8 +731,10 @@ def testUndirectionalGraphDrawing():
     assert g.addEdge("v7", "v8").label == "e7"
     assert g.addEdge("v8", "v9").label == "e8"
     assert g.addEdge("v9", "v1").label == "e9"
+    assert g.addEdge("v9", "v2").label == "e10"
+    assert g.addEdge("v6", "v4").label == "e11"
+    assert g.addEdge("v3", "v7").label == "e12"
     drawGraph.drawVertexes(g, 3, 'test1.png')
-
 
 def testTakeDownDirectional():    
     g = Graph(True)
@@ -868,7 +870,8 @@ def testLoaders():
     assert g.equals(g2)
 
 def testRandomGraphGenerator():
-    g = Graph.generateRandomGraph(3, 3, directed=False)
+    g = Graph.generateRandomGraph(4, 7, directed=False)
+    drawGraph.drawVertexes(g, 3, 'random.png')
     print("Generated graph:")
     # drawGraph.drawVertexes(g, 3, 'g.png')
     print(g)
@@ -913,7 +916,6 @@ def test():
     testLoaders()
     testRandomGraphGenerator()
     testUndirectionalGraphDrawing()
-
     
     print("Done.")
 
