@@ -104,10 +104,10 @@ class Edge:
               |___/    
     """
 
-    def __init__(self, startVertex: Vertex, endVertex: Vertex, label: str, wage: float = 1.0):
+    def __init__(self, startVertex: Vertex, endVertex: Vertex, label: str, weight: float = 1.0):
         assert startVertex.graph == endVertex.graph
         self.label = label
-        self.wage: float = wage
+        self.weight: float = weight
         self.startVertex: Vertex = startVertex
         self.endVertex: Vertex = endVertex
         self.startVertex.outEdges.update({label: self})
@@ -140,14 +140,14 @@ class Edge:
             return False
         if self.startVertex.label != another.startVertex.label or self.endVertex.label != another.endVertex.label:
             return False
-        if self.wage != another.wage:
+        if self.weight != another.weight:
             return False
         return True
 
     def __str__(self):
-        # return "(" + self.label + ": " + self.startVertex.label + " -> " + self.endVertex.label + (", wage = " + str(self.wage) if self.wage != 1.0 else "") + ")"
+        # return "(" + self.label + ": " + self.startVertex.label + " -> " + self.endVertex.label + (", weight = " + str(self.weight) if self.weight != 1.0 else "") + ")"
         return (f"({self.label}: {self.startVertex.label} -> {self.endVertex.label}"
-                + f", weight = {self.wage}" if self.wage != 1.0 else ""
+                + f", weight = {self.weight}" if self.weight != 1.0 else ""
                 )
 
 
@@ -266,7 +266,7 @@ class Graph:
         """
         return self.edgeIndex.get(label, None)
 
-    def addEdge(self, startVertex, endVertex, label: str = None, wage: float = 1.0):
+    def addEdge(self, startVertex, endVertex, label: str = None, weight: float = 1.0):
         """
         Tworzy nową krawędź.
         Jako parametry przyjmuje referencje do wierzchołków, lub ich etykiety.
@@ -281,7 +281,7 @@ class Graph:
             endVertex = self.getVertex(endVertex)
         if startVertex == None or endVertex == None:
             raise Exception("Vertex not found", startVertex, endVertex)
-        newEdge: Edge = Edge(startVertex, endVertex, label, wage)
+        newEdge: Edge = Edge(startVertex, endVertex, label, weight)
         self.edgeIndex.update({label: newEdge})
         startVertex.degree += 1
         endVertex.degree += 1
@@ -335,7 +335,7 @@ class Graph:
         for label in another.vertexIndex:
             self.addVertex(label)
         for edge in another.edgeIndex.values():
-            self.addEdge(edge.startVertex.label, edge.endVertex.label, edge.label, edge.wage)
+            self.addEdge(edge.startVertex.label, edge.endVertex.label, edge.label, edge.weight)
         return self
 
     def copy(self):
@@ -433,7 +433,7 @@ class Graph:
         matrix = [[0.0 for i in vertexList] for j in vertexList]
         for i, vertex1 in enumerate(vertexList):
             for j, vertex2 in enumerate(vertexList):
-                matrix[i][j] += sum(edge.wage for edge in self.findEdges(vertex1, vertex2, True))
+                matrix[i][j] += sum(edge.weight for edge in self.findEdges(vertex1, vertex2, True))
         return (vertexLabelList, matrix)
 
     def loadAdjacencyMatrix(self, matrix):
@@ -457,7 +457,7 @@ class Graph:
         for i, vertex1 in enumerate(self.vertexIndex.values()):
             for j, vertex2 in enumerate(self.vertexIndex.values()):
                 if matrix[i][j] != 0:
-                    self.addEdge(vertex1, vertex2, wage=matrix[i][j])
+                    self.addEdge(vertex1, vertex2, weight=matrix[i][j])
                 if (not self.isDirected()) and (j > i):
                     break
         return self
@@ -468,7 +468,7 @@ class Graph:
         """
         result = []
         for edge in self.edgeIndex.values():
-            result.append((edge.label, edge.startVertex.label, edge.endVertex.label, edge.wage))
+            result.append((edge.label, edge.startVertex.label, edge.endVertex.label, edge.weight))
         return result
 
     def loadAdjacencyList(self, dataList):
@@ -480,7 +480,7 @@ class Graph:
         for record in dataList:
             vertex1 = self.getOrAddVertex(record[1])
             vertex2 = self.getOrAddVertex(record[2])
-            self.addEdge(vertex1, vertex2, label=record[0], wage=record[3])
+            self.addEdge(vertex1, vertex2, label=record[0], weight=record[3])
         return self
 
     def createIncidenceMatrix(self):
@@ -591,8 +591,8 @@ def testDirectionalGraph():
     assert g.addVertex(g.proposalVertexName()).label == "v3"
     assert g.addEdge("v1", "v2").label == "e1"
     assert g.addEdge("v2", "v3").label == "e2"
-    assert g.addEdge("v3", "v1", wage=1.1).label == "e3"
-    assert g.addEdge("v2", "v1", wage=1).label == "e4"
+    assert g.addEdge("v3", "v1", weight=1.1).label == "e3"
+    assert g.addEdge("v2", "v1", weight=1).label == "e4"
     assert g.equals(g)
     print(g.createAdjacencyMatrix())
     print(g.createAdjacencyList())
