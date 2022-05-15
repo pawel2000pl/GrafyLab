@@ -50,12 +50,14 @@ def drawMultiGraph(graph, radius, filename):
     Krawędzie oznaczone są swoją krotnością
     """
     g = nx.MultiGraph()
+    for label, vertex in graph.vertexIndex.items():
+        g.add_node(label)
     for label, edge in graph.edgeIndex.items():
         g.add_edge(edge.startVertex.label, edge.endVertex.label)
 
     edge_labels = {edge: g.number_of_edges(edge[0], edge[1]) for edge in g.edges()}
 
-    pos = nx.spring_layout(g)
+    pos = nx.circular_layout(g)
     nx.draw(g, pos=pos, with_labels=True)
     nx.draw_networkx_edge_labels(g, pos=pos, edge_labels=edge_labels, rotate=False)
     plt.savefig(filename)
