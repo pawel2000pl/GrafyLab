@@ -329,6 +329,20 @@ class Graph:
         del edge
         return True
 
+    def removeDuplicatedEdges(self):
+        """
+        Usuwa nadmiarowe krawędzie, jeżeli między dwoma wierzchołkami 
+        jest więcej niż jedna w tym samym kierunku.
+        """
+        for vertex in self.vertexIndex.values():
+            adjacent = set(edge.endVertex for edge in vertex.outEdges.values())
+            for edge in vertex.outEdges.copy().values():
+                if edge.endVertex in adjacent:
+                    adjacent.remove(edge.endVertex)
+                else:
+                    edge.removeMe()     
+
+
     def findEdges(self, startVertex, endVertex, oneElementList: bool = False):
         """
         Znajduje wszystkie krawędzie pomiędzy dwoma wierzchołkami.
@@ -496,7 +510,6 @@ class Graph:
                     opposite = e.oppositeVertex(v)
                     adjacencies.append(opposite.getLabel())
             result.append((v.getLabel(), adjacencies))
-        print(" ", result)
         return result
 
     def loadAdjacencyList(self, dataList):
@@ -671,9 +684,16 @@ class Graph:
                 v[0] = nr # oznaczamy v jako odwiedzony i należący do spójnej składowej nr
                 comp = Graph.components_R(nr, v[1], self, comp)
         
-        # for i in comp:
-            # print(i[0], i[1].getLabel())
-        return comp
+        thegreatestcompList = []
+
+        comp_nums = [i[0] for i in comp]
+        thegreatestcomp = max(set(comp_nums), key = comp_nums.count)
+
+        for i in comp:
+            if i[0] == thegreatestcomp:
+                thegreatestcompList.append(i[1].getLabel())
+                
+        return comp, thegreatestcompList
 
     @staticmethod
     def components_R(nr, v, g, comp):
@@ -940,7 +960,6 @@ def testTextLoaders():
     for _ in range(6):
         g.addVertex()
     g.addEdge("v1", "v2")
-    g.addEdge("v2", "v2")
     g.addEdge("v3", "v4")
     g.addEdge("v4", "v5")
     g.addEdge("v5", "v3")
