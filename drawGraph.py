@@ -55,8 +55,8 @@ def drawMultiGraph(graph, radius, filename):
 
     edge_labels = {edge: g.number_of_edges(edge[0], edge[1]) for edge in g.edges()}
 
-    pos = nx.circular_layout(g)
+    pos = nx.spring_layout(g)
     nx.draw(g, pos=pos, with_labels=True)
-    nx.draw_networkx_edge_labels(g, pos=pos, edge_labels=edge_labels)
+    nx.draw_networkx_edge_labels(g, pos=pos, edge_labels=edge_labels, rotate=False)
     plt.savefig(filename)
     plt.clf()
