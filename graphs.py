@@ -1,6 +1,5 @@
 import random
 import drawGraph
-
 """
    ___               _           
   / __|_ _ __ _ _ __| |_  ___ ___
@@ -57,6 +56,17 @@ class Vertex:
     def removeMe(self):
         return self.graph.removeVertex(self)
 
+    def adjacentVertices(self):
+        """
+        Zwraca listę wierzchołków przyległych.
+        Tylko dla grafów nieskierowanych.
+        """
+        adjacencies = [] # lista przyległych wierzchołków
+        for e in self.inEdges.values():
+            opposite = e.oppositeVertex(self)
+            adjacencies.append(opposite)
+        return adjacencies
+
     def getGraph(self):
         return self.graph
 
@@ -74,6 +84,17 @@ class Vertex:
             if another.outEdges.get(edge.label, None) == None:
                 return False
         return True
+
+    def getOutEdges(self):
+        return self.outEdges
+
+    def getInEdges(self):
+        return self.inEdges
+
+    def getLabel(self):
+        return self.label
+
+        
 
     def __str__(self):
         result = "[" + self.label + ": "
@@ -93,7 +114,6 @@ class Vertex:
         else:
             result += cont
         return result + "]"
-
 
 class Edge:
     """
@@ -258,7 +278,6 @@ class Graph:
             for vertex in self.vertexIndex.values():
                 vertex.inputDegree = vertex.degree
                 vertex.outputDegree = vertex.degree
-
     def getEdge(self, label: str):
         """
         Zwraca referencję do krawędzi na podstawie etykiety.
@@ -467,8 +486,14 @@ class Graph:
         Tworzy listę sąsiedztwa.
         """
         result = []
-        for edge in self.edgeIndex.values():
-            result.append((edge.label, edge.startVertex.label, edge.endVertex.label, edge.weight))
+        for v in self.vertexIndex.values():
+            edges = v.getOutEdges()
+            adjacencies = [] # lista przyległych wierzchołków
+            for e in edges.values():
+                    opposite = e.oppositeVertex(v)
+                    adjacencies.append(opposite.getLabel())
+            result.append((v.getLabel(), adjacencies))
+        
         return result
 
     def loadAdjacencyList(self, dataList):
@@ -477,10 +502,14 @@ class Graph:
         Nie sprawdza poprawnośc zapisu.
         Przyjmuje listę w formacie wygenerowanycm przez createAdjacencyList().
         """
-        for record in dataList:
-            vertex1 = self.getOrAddVertex(record[1])
-            vertex2 = self.getOrAddVertex(record[2])
-            self.addEdge(vertex1, vertex2, label=record[0], weight=record[3])
+
+        for i in dataList:
+            self.getOrAddVertex(i[0])
+            for v in i[1]:
+                self.getOrAddVertex(v)
+                self.addEdge(i[0], v)
+
+
         return self
 
     def createIncidenceMatrix(self):
@@ -526,6 +555,9 @@ class Graph:
                     endVertex = vertexList[j]
             self.addEdge(startVertex, endVertex, edgeLabelList[i]);
         return self
+
+    def getVertexIndex(self):
+        return self.vertexIndex
 
     @staticmethod
     def generateRandomGraph(n, l, directed: bool = False):
@@ -575,10 +607,47 @@ class Graph:
 
         return g
 
-    ##
+    def components(self):
+        """
+        Algorytm oznaczający spójne składowe.
+        Zwraca listę krotek (nr skladowej, wierzcholek)
+        """
+        nr = 0 # nr spójnej składowej
 
+        vertices = self.vertexIndex.values()
 
-#  _____       _
+        comp = [] 
+        for v in vertices:
+            comp.append([-1, v]) # wszystkie wierzchołki są nieodwiedzone
+
+        for v in comp:
+            if v[0] == -1:
+                nr += 1
+                v[0] = nr # oznaczamy v jako odwiedzony i należący do spójnej składowej nr
+                comp = Graph.components_R(nr, v[1], self, comp)
+        
+        # for i in comp:
+            # print(i[0], i[1].getLabel())
+        return comp
+
+    @staticmethod
+    def components_R(nr, v, g, comp):
+        """
+        Rekursywne przeszukiwanie w głąb
+        """
+        comp[2][0] = 2
+        for u in v.adjacentVertices(): # przeglądamy sąsiadów
+            try:
+                idx = comp.index([-1, u])
+                if comp[idx][0] == -1:
+                    comp[idx][0] = nr
+                    Graph.components_R(nr, comp[idx][1], g, comp)
+            except ValueError:
+                continue
+
+        return comp
+
+#  _____       _      
 # |_   _|__ __| |_ ___
 #   | |/ -_|_-<  _(_-<
 #   |_|\___/__/\__/__/                
@@ -775,55 +844,83 @@ def testTakeDownUndirectional():
 
 
 def testLoaders():
-    g = Graph(True)
-    assert g != None
-    assert g.addVertex(g.proposalVertexName()).label == "v1"
-    assert g.addVertex(g.proposalVertexName()).label == "v2"
-    assert g.addVertex(g.proposalVertexName()).label == "v3"
-    assert g.addEdge("v1", "v2").label == "e1"
-    assert g.addEdge("v2", "v3").label == "e2"
-    assert g.addEdge("v3", "v1").label == "e3"
-
-    g1 = Graph(True).loadAdjacencyMatrix(g.createAdjacencyMatrix())
-    g2 = Graph(True).loadAdjacencyMatrix(g1.createAdjacencyMatrix())
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
-
-    g1 = Graph(True).loadAdjacencyList(g.createAdjacencyList())
-    g2 = Graph(True).loadAdjacencyList(g1.createAdjacencyList())
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
-
-    g1 = Graph(True).loadIncidenceMatrix(g.createIncidenceMatrix())
-    g2 = Graph(True).loadIncidenceMatrix(g1.createIncidenceMatrix())
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
-
-    g1 = Graph(True).loadAdjacencyMatrix(g.createAdjacencyMatrix()[1])
-    g2 = Graph(True).loadAdjacencyMatrix(g1.createAdjacencyMatrix()[1])
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
-
-    g1 = Graph(True).loadIncidenceMatrix(g.createIncidenceMatrix()[2])
-    g2 = Graph(True).loadIncidenceMatrix(g1.createIncidenceMatrix()[2])
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
+    for dir in [True, False]:
+        g = Graph(dir)
+        assert g != None
+        assert g.addVertex(g.proposalVertexName()).label == "v1"
+        assert g.addVertex(g.proposalVertexName()).label == "v2"
+        assert g.addVertex(g.proposalVertexName()).label == "v3"
+        assert g.addEdge("v1", "v2").label == "e1"
+        assert g.addEdge("v2", "v3").label == "e2"
+        assert g.addEdge("v3", "v1").label == "e3"
+        
+        g1 = Graph(dir).loadAdjacencyMatrix(g.createAdjacencyMatrix())
+        g2 = Graph(dir).loadAdjacencyMatrix(g1.createAdjacencyMatrix())
+        assert g1.equals(g2)
+        assert g.equals(g1)
+        assert g.equals(g2)
+        
+        g1 = Graph(dir).loadAdjacencyList(g.createAdjacencyList())
+        g2 = Graph(dir).loadAdjacencyList(g1.createAdjacencyList())
+        assert g1.equals(g2)
+        assert g.equals(g1)
+        assert g.equals(g2)
+        
+        g1 = Graph(dir).loadIncidenceMatrix(g.createIncidenceMatrix())
+        g2 = Graph(dir).loadIncidenceMatrix(g1.createIncidenceMatrix())
+        assert g1.equals(g2)
+        assert g.equals(g1)
+        assert g.equals(g2)
+        
+        
+        g1 = Graph(dir).loadAdjacencyMatrix(g.createAdjacencyMatrix()[1])
+        g2 = Graph(dir).loadAdjacencyMatrix(g1.createAdjacencyMatrix()[1])
+        assert g1.equals(g2)
+        assert g.equals(g1)
+        assert g.equals(g2)
+        
+        g1 = Graph(dir).loadIncidenceMatrix(g.createIncidenceMatrix()[2])
+        g2 = Graph(dir).loadIncidenceMatrix(g1.createIncidenceMatrix()[2])
+        assert g1.equals(g2)
+        assert g.equals(g1)
+        assert g.equals(g2)
 
 
 def testRandomGraphGenerator():
-    g = Graph.generateRandomGraph(4, 7, directed=False)
+    g = Graph.generateRandomGraph(10, 15, directed=False)
     drawGraph.drawVertexes(g, 3, 'random.png')
     print("Generated graph:")
+    # drawGraph.drawVertexes(g, 3, 'g.png')
     print(g)
 
     g2 = Graph.generateRandomGraphProbability(5, 0.5, directed=False)
     print("Generated graph:")
     print(g2)
+
+def testComponents():
+    g = Graph(directed=False)
+    for _ in range(11):
+        g.addVertex()
+
+    g.addEdge("v1", "v2")
+    g.addEdge("v1", "v3")
+    g.addEdge("v1", "v4")
+    g.addEdge("v1", "v5")
+    g.addEdge("v1", "v6")
+    g.addEdge("v1", "v7")
+    g.addEdge("v2", "v3")
+    g.addEdge("v2", "v6")
+    g.addEdge("v2", "v7")
+    g.addEdge("v3", "v6")
+    g.addEdge("v4", "v7")
+    g.addEdge("v5", "v11")
+    
+    g.addEdge("v8", "v9")
+    g.addEdge("v8", "v10")
+    g.addEdge("v9", "v10")
+
+    g.components()
+
 
 
 def test():
@@ -833,10 +930,11 @@ def test():
     testUndirectionalGraph()
     testTakeDownDirectional()
     testTakeDownUndirectional()
-    testLoaders()
+    # testLoaders()
     testRandomGraphGenerator()
     testUndirectionalGraphDrawing()
-
+    testComponents()
+    
     print("Done.")
 
 
@@ -860,4 +958,6 @@ def generateDocumentation(moduleName: str = "graphes"):
 
 if __name__ == "__main__":
     test()
-    generateDocumentation()
+    # generateDocumentation()
+
+    
