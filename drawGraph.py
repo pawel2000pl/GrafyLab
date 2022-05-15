@@ -34,7 +34,7 @@ def drawVertexes(graph, radius, filename):
                 if graph.findEdges('v' + str(i), 'v' + str(j)) is not None:
                     startVertex = 'v' + str(i)
                     endVertex = 'v' + str(j)
-                    print(graph.findEdges('v' + str(i), 'v' + str(j)))
+                    # print(graph.findEdges('v' + str(i), 'v' + str(j)))
                     g.add_edge(startVertex, endVertex)
 
     pos = nx.circular_layout(g)
