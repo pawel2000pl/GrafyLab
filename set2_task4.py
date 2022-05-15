@@ -124,7 +124,6 @@ def findEulerCycle(graph: Graph):
         for _, edge in vertex.inEdges.items():
             if not isBridge(edge):
                 cycle.append(edge)
-                drawGraph.drawMultiGraph(graph, 5, 'afterFindingCycle.png')
                 graph.removeEdge(edge)
                 if len(vertex.inEdges) == 0:
                     graph.removeVertex(vertex)
@@ -133,7 +132,6 @@ def findEulerCycle(graph: Graph):
         # Pick one at random at keep going
         edge = vertex.inEdges.get(choice(list(vertex.inEdges)))
         cycle.append(edge)
-        drawGraph.drawMultiGraph(graph, 5, 'afterFindingCycle.png')
         graph.removeEdge(edge)
         if len(vertex.inEdges) == 0:
             graph.removeVertex(vertex)
@@ -141,7 +139,6 @@ def findEulerCycle(graph: Graph):
 
     print("Cycle:")
     result = traverse(start)
-    drawGraph.drawMultiGraph(graph,5,'afterFindingCycle.png')
     return result
 
 # Tests (not really iks de)
