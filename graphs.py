@@ -123,7 +123,7 @@ class Edge:
     def getLabel(self):
         return self.label
 
-    def opposideVertex(self, vertex: Vertex):
+    def oppositeVertex(self, vertex: Vertex):
         """
         Zwraca wierzchołek po przeciwnej stronie krawędzi, niż ten podany w parametrze.
         Jako parametr przyjmuje referencję do wierzchołka lub jego etykietę.
@@ -599,8 +599,8 @@ def testDirectionalGraph():
     print(g.createIncidenceMatrix())
     assert str(g) != None
     print(g)
-    assert g.getEdge("e1").opposideVertex("v1").label == "v2"
-    assert g.getEdge("e1").opposideVertex("v2").label == "v1"
+    assert g.getEdge("e1").oppositeVertex("v1").label == "v2"
+    assert g.getEdge("e1").oppositeVertex("v2").label == "v1"
     g2 = g.copy()
     assert g.equals(g2)
     assert g2.equals(g)
@@ -627,8 +627,8 @@ def testUndirectionalGraph():
     assert g.addEdge("v1", "v2").label == "e1"
     assert g.addEdge("v2", "v3").label == "e2"
     assert g.addEdge("v3", "v1").label == "e3"
-    assert g.getEdge("e1").opposideVertex("v1").label == "v2"
-    assert g.getEdge("e1").opposideVertex("v2").label == "v1"
+    assert g.getEdge("e1").oppositeVertex("v1").label == "v2"
+    assert g.getEdge("e1").oppositeVertex("v2").label == "v1"
     assert g.equals(g)
     print(g.createAdjacencyMatrix())
     print(g.createAdjacencyList())
