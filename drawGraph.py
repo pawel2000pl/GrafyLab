@@ -41,3 +41,22 @@ def drawVertexes(graph, radius, filename):
     nx.draw(g, with_labels=True, pos=pos)
     plt.savefig(filename)
     plt.clf()
+
+
+def drawMultiGraph(graph, radius, filename):
+    """
+    Dokonuje konwersji z typu Graph na networkx.Graph().
+    Zapisuje wizualizacje grafu do pliku o podanej nazwie
+    Krawędzie oznaczone są swoją krotnością
+    """
+    g = nx.MultiGraph()
+    for label, edge in graph.edgeIndex.items():
+        g.add_edge(edge.startVertex.label, edge.endVertex.label)
+
+    edge_labels = {edge: g.number_of_edges(edge[0], edge[1]) for edge in g.edges()}
+
+    pos = nx.circular_layout(g)
+    nx.draw(g, pos=pos, with_labels=True)
+    nx.draw_networkx_edge_labels(g, pos=pos, edge_labels=edge_labels)
+    plt.savefig(filename)
+    plt.clf()
