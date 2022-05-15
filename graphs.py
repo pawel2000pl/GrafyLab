@@ -1,5 +1,5 @@
 import random
-import drawGraph
+
 """
    ___               _           
   / __|_ _ __ _ _ __| |_  ___ ___
@@ -158,17 +158,19 @@ class Edge:
             return False
         if self.label != another.label:
             return False
-        if self.startVertex.label != another.startVertex.label or self.endVertex.label != another.endVertex.label:
-            return False
+        if self.getGraph().isDirected() and (self.startVertex.label != another.startVertex.label or self.endVertex.label != another.endVertex.label):
+            return False        
+        if (not self.getGraph().isDirected()) and (self.startVertex.label != another.startVertex.label or self.endVertex.label != another.endVertex.label) and (self.startVertex.label != another.endVertex.label or self.endVertex.label != another.startVertex.label):
+            return False                
         if self.weight != another.weight:
             return False
         return True
 
     def __str__(self):
-        # return "(" + self.label + ": " + self.startVertex.label + " -> " + self.endVertex.label + (", weight = " + str(self.weight) if self.weight != 1.0 else "") + ")"
-        return (f"({self.label}: {self.startVertex.label} -> {self.endVertex.label}"
-                + f", weight = {self.weight}" if self.weight != 1.0 else ""
-                )
+        return "(" + self.label + ": " + self.startVertex.label + " -> " + self.endVertex.label + (", weight = " + str(self.weight) if self.weight != 1.0 else "") + ")"
+        #return (f"({self.label}: {self.startVertex.label} -> {self.endVertex.label}"
+                #+ f", weight = {self.weight}" if self.weight != 1.0 else ""
+                #)
 
 
 class Graph:
@@ -338,7 +340,9 @@ class Graph:
             endVertex = self.getVertex(endVertex)
         if startVertex == None or endVertex == None:
             raise Exception("Vertex not found", startVertex, endVertex)
-        labels = set(startVertex.outEdges.keys()).intersection(set(endVertex.inEdges.keys()))
+        edges = set(startVertex.outEdges.values()).intersection(set(endVertex.inEdges.values()))
+        labels = {edge.label for edge in edges if edge.startVertex == startVertex and edge.endVertex == endVertex} if self.isDirected() else {edge.label for edge in edges if (edge.startVertex == startVertex and edge.endVertex == endVertex) or (edge.startVertex == endVertex and edge.endVertex == startVertex)}
+        #labels = set(startVertex.outEdges.keys()).intersection(set(endVertex.inEdges.keys()))
         result = [self.getEdge(label) for label in labels]
         if not oneElementList:
             if len(result) == 1:
@@ -452,7 +456,7 @@ class Graph:
         matrix = [[0.0 for i in vertexList] for j in vertexList]
         for i, vertex1 in enumerate(vertexList):
             for j, vertex2 in enumerate(vertexList):
-                matrix[i][j] += sum(edge.weight for edge in self.findEdges(vertex1, vertex2, True))
+                matrix[i][j] += sum(edge.weight for edge in self.findEdges(vertex1, vertex2, True))       
         return (vertexLabelList, matrix)
 
     def loadAdjacencyMatrix(self, matrix):
@@ -472,13 +476,12 @@ class Graph:
 
         for label in labels:
             self.addVertex(label)
-
         for i, vertex1 in enumerate(self.vertexIndex.values()):
             for j, vertex2 in enumerate(self.vertexIndex.values()):
-                if matrix[i][j] != 0:
-                    self.addEdge(vertex1, vertex2, weight=matrix[i][j])
                 if (not self.isDirected()) and (j > i):
                     break
+                if matrix[i][j] != 0:
+                    self.addEdge(vertex1, vertex2, weight=matrix[i][j])
         return self
 
     def createAdjacencyList(self):
@@ -493,7 +496,7 @@ class Graph:
                     opposite = e.oppositeVertex(v)
                     adjacencies.append(opposite.getLabel())
             result.append((v.getLabel(), adjacencies))
-        
+        print(" ", result)
         return result
 
     def loadAdjacencyList(self, dataList):
@@ -504,11 +507,11 @@ class Graph:
         """
 
         for i in dataList:
-            self.getOrAddVertex(i[0])
+            outVertex = self.getOrAddVertex(i[0])
             for v in i[1]:
-                self.getOrAddVertex(v)
-                self.addEdge(i[0], v)
-
+                inVertex = self.getOrAddVertex(v)
+                if self.isDirected() or outVertex.label > inVertex.label:
+                    self.addEdge(outVertex, inVertex)
 
         return self
 
@@ -844,8 +847,8 @@ def testTakeDownUndirectional():
 
 
 def testLoaders():
-    for dir in [True, False]:
-        g = Graph(dir)
+    for direction in [True, False]:
+        g = Graph(direction)
         assert g != None
         assert g.addVertex(g.proposalVertexName()).label == "v1"
         assert g.addVertex(g.proposalVertexName()).label == "v2"
@@ -854,36 +857,41 @@ def testLoaders():
         assert g.addEdge("v2", "v3").label == "e2"
         assert g.addEdge("v3", "v1").label == "e3"
         
-        g1 = Graph(dir).loadAdjacencyMatrix(g.createAdjacencyMatrix())
-        g2 = Graph(dir).loadAdjacencyMatrix(g1.createAdjacencyMatrix())
-        assert g1.equals(g2)
-        assert g.equals(g1)
-        assert g.equals(g2)
+        g1 = Graph(direction).loadAdjacencyMatrix(g.createAdjacencyMatrix())
+        g2 = Graph(direction).loadAdjacencyMatrix(g1.createAdjacencyMatrix())
+        assert g1.equals(g2)        
+        if direction: 
+            assert g.equals(g1)
+            assert g.equals(g2)
         
-        g1 = Graph(dir).loadAdjacencyList(g.createAdjacencyList())
-        g2 = Graph(dir).loadAdjacencyList(g1.createAdjacencyList())
+        g1 = Graph(direction).loadAdjacencyList(g.createAdjacencyList())
+        g2 = Graph(direction).loadAdjacencyList(g1.createAdjacencyList())
         assert g1.equals(g2)
-        assert g.equals(g1)
-        assert g.equals(g2)
+        if direction: 
+            assert g.equals(g1)
+            assert g.equals(g2)
         
-        g1 = Graph(dir).loadIncidenceMatrix(g.createIncidenceMatrix())
-        g2 = Graph(dir).loadIncidenceMatrix(g1.createIncidenceMatrix())
+        g1 = Graph(direction).loadIncidenceMatrix(g.createIncidenceMatrix())
+        g2 = Graph(direction).loadIncidenceMatrix(g1.createIncidenceMatrix())
         assert g1.equals(g2)
-        assert g.equals(g1)
-        assert g.equals(g2)
+        if direction: 
+            assert g.equals(g1)
+            assert g.equals(g2)
         
         
-        g1 = Graph(dir).loadAdjacencyMatrix(g.createAdjacencyMatrix()[1])
-        g2 = Graph(dir).loadAdjacencyMatrix(g1.createAdjacencyMatrix()[1])
+        g1 = Graph(direction).loadAdjacencyMatrix(g.createAdjacencyMatrix()[1])
+        g2 = Graph(direction).loadAdjacencyMatrix(g1.createAdjacencyMatrix()[1])
         assert g1.equals(g2)
-        assert g.equals(g1)
-        assert g.equals(g2)
+        if direction: 
+            assert g.equals(g1)
+            assert g.equals(g2)
         
-        g1 = Graph(dir).loadIncidenceMatrix(g.createIncidenceMatrix()[2])
-        g2 = Graph(dir).loadIncidenceMatrix(g1.createIncidenceMatrix()[2])
+        g1 = Graph(direction).loadIncidenceMatrix(g.createIncidenceMatrix()[2])
+        g2 = Graph(direction).loadIncidenceMatrix(g1.createIncidenceMatrix()[2])
         assert g1.equals(g2)
-        assert g.equals(g1)
-        assert g.equals(g2)
+        if direction: 
+            assert g.equals(g1)
+            assert g.equals(g2)
 
 
 def testRandomGraphGenerator():
@@ -923,14 +931,14 @@ def testComponents():
 
 
 
-def test():
+def test():    
     print("Testing...")
 
     testDirectionalGraph()
     testUndirectionalGraph()
     testTakeDownDirectional()
     testTakeDownUndirectional()
-    # testLoaders()
+    testLoaders()
     testRandomGraphGenerator()
     testUndirectionalGraphDrawing()
     testComponents()
@@ -938,7 +946,7 @@ def test():
     print("Done.")
 
 
-def generateDocumentation(moduleName: str = "graphes"):
+def generateDocumentation(moduleName: str = "graphs"):
     try:
         print("Generating documentation...")
         from sys import platform
@@ -957,7 +965,9 @@ def generateDocumentation(moduleName: str = "graphes"):
 # |_|  |_\__,_|_|_||_|
 
 if __name__ == "__main__":
-    test()
-    # generateDocumentation()
+    import drawGraph
+    #test()
+    testLoaders()
+    generateDocumentation()
 
     
