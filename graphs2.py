@@ -1,5 +1,5 @@
-from drawGraph import drawVertexes, drawMultiGraph, drawCircularGraph
-from graphs import *
+from drawGraph import drawCircularGraph
+from graphs import Graph
 
 
 def prepareGraphForHamilton(graph):
@@ -19,13 +19,11 @@ def hamiltonCycle(graph: list, v: int = 0, stack: list = None) -> list:
     if stack is None:
         stack = []
     size = len(graph)
-
     if v not in set(stack):
         stack.append(v)
 
         if len(stack) == size:
             if stack[-1] in graph[stack[0]]:
-                stack.append(stack[0])
                 return [x + 1 for x in stack]
             else:
                 stack.pop()
