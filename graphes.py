@@ -86,6 +86,9 @@ class Vertex:
         
     def getInEdges(self):
         return self.inEdges
+
+    def getOutEdges(self):
+        return self.outEdges
         
     def getLabel(self):
         return self.label
@@ -479,13 +482,13 @@ class Graph:
         """
         result = []
         for v in self.vertexIndex.values():
-            edges = v.getInEdges()
+            edges = v.getOutEdges()
             adjacencies = [] # lista przyległych wierzchołków
             for e in edges.values():
                     opposite = e.opposideVertex(v)
-                    adjacencies.append(opposite)
+                    adjacencies.append(opposite.getLabel())
             result.append((v.getLabel(), adjacencies))
-
+        
         return result
     
     def loadAdjacencyList(self, dataList):
@@ -494,10 +497,14 @@ class Graph:
         Nie sprawdza poprawnośc zapisu.
         Przyjmuje listę w formacie wygenerowanycm przez createAdjacencyList().
         """
-        for record in dataList:
-            vertex1 = self.getOrAddVertex(record[1])
-            vertex2 = self.getOrAddVertex(record[2])
-            self.addEdge(vertex1, vertex2, label=record[0], wage=record[3])
+
+        for i in dataList:
+            self.getOrAddVertex(i[0])
+            for v in i[1]:
+                self.getOrAddVertex(v)
+                self.addEdge(i[0], v)
+
+
         return self
     
     def createIncidenceMatrix(self):
@@ -829,48 +836,49 @@ def testTakeDownUndirectional():
     assert g.equals(g)
 
 def testLoaders():
-    g = Graph(True)
-    assert g != None
-    assert g.addVertex(g.proposalVertexName()).label == "v1"
-    assert g.addVertex(g.proposalVertexName()).label == "v2"
-    assert g.addVertex(g.proposalVertexName()).label == "v3"
-    assert g.addEdge("v1", "v2").label == "e1"
-    assert g.addEdge("v2", "v3").label == "e2"
-    assert g.addEdge("v3", "v1").label == "e3"
-    
-    g1 = Graph(True).loadAdjacencyMatrix(g.createAdjacencyMatrix())
-    g2 = Graph(True).loadAdjacencyMatrix(g1.createAdjacencyMatrix())
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
-    
-    g1 = Graph(True).loadAdjacencyList(g.createAdjacencyList())
-    g2 = Graph(True).loadAdjacencyList(g1.createAdjacencyList())
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
-    
-    g1 = Graph(True).loadIncidenceMatrix(g.createIncidenceMatrix())
-    g2 = Graph(True).loadIncidenceMatrix(g1.createIncidenceMatrix())
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
-    
-    
-    g1 = Graph(True).loadAdjacencyMatrix(g.createAdjacencyMatrix()[1])
-    g2 = Graph(True).loadAdjacencyMatrix(g1.createAdjacencyMatrix()[1])
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
-    
-    g1 = Graph(True).loadIncidenceMatrix(g.createIncidenceMatrix()[2])
-    g2 = Graph(True).loadIncidenceMatrix(g1.createIncidenceMatrix()[2])
-    assert g1.equals(g2)
-    assert g.equals(g1)
-    assert g.equals(g2)
+    for dir in [True, False]:
+        g = Graph(dir)
+        assert g != None
+        assert g.addVertex(g.proposalVertexName()).label == "v1"
+        assert g.addVertex(g.proposalVertexName()).label == "v2"
+        assert g.addVertex(g.proposalVertexName()).label == "v3"
+        assert g.addEdge("v1", "v2").label == "e1"
+        assert g.addEdge("v2", "v3").label == "e2"
+        assert g.addEdge("v3", "v1").label == "e3"
+        
+        g1 = Graph(dir).loadAdjacencyMatrix(g.createAdjacencyMatrix())
+        g2 = Graph(dir).loadAdjacencyMatrix(g1.createAdjacencyMatrix())
+        assert g1.equals(g2)
+        assert g.equals(g1)
+        assert g.equals(g2)
+        
+        g1 = Graph(dir).loadAdjacencyList(g.createAdjacencyList())
+        g2 = Graph(dir).loadAdjacencyList(g1.createAdjacencyList())
+        assert g1.equals(g2)
+        assert g.equals(g1)
+        assert g.equals(g2)
+        
+        g1 = Graph(dir).loadIncidenceMatrix(g.createIncidenceMatrix())
+        g2 = Graph(dir).loadIncidenceMatrix(g1.createIncidenceMatrix())
+        assert g1.equals(g2)
+        assert g.equals(g1)
+        assert g.equals(g2)
+        
+        
+        g1 = Graph(dir).loadAdjacencyMatrix(g.createAdjacencyMatrix()[1])
+        g2 = Graph(dir).loadAdjacencyMatrix(g1.createAdjacencyMatrix()[1])
+        assert g1.equals(g2)
+        assert g.equals(g1)
+        assert g.equals(g2)
+        
+        g1 = Graph(dir).loadIncidenceMatrix(g.createIncidenceMatrix()[2])
+        g2 = Graph(dir).loadIncidenceMatrix(g1.createIncidenceMatrix()[2])
+        assert g1.equals(g2)
+        assert g.equals(g1)
+        assert g.equals(g2)
 
 def testRandomGraphGenerator():
-    g = Graph.generateRandomGraph(4, 7, directed=False)
+    g = Graph.generateRandomGraph(10, 15, directed=False)
     drawGraph.drawVertexes(g, 3, 'random.png')
     print("Generated graph:")
     # drawGraph.drawVertexes(g, 3, 'g.png')
@@ -880,7 +888,7 @@ def testRandomGraphGenerator():
     print("Generated graph:")
     print(g2)
 
-def testStronglyConnectedComponent():
+def testComponents():
     g = Graph(directed=False)
     for _ in range(11):
         g.addVertex()
@@ -916,6 +924,7 @@ def test():
     testLoaders()
     testRandomGraphGenerator()
     testUndirectionalGraphDrawing()
+    testComponents()
     
     print("Done.")
 
@@ -938,7 +947,7 @@ def generateDocumentation(moduleName: str = "graphes"):
                             
 if __name__ == "__main__":
     # test()
+    testLoaders()
     # generateDocumentation()
-    testStronglyConnectedComponent()
 
     
