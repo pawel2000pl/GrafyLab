@@ -1,4 +1,6 @@
 import random
+
+from urllib3 import Retry
 import drawGraph
 """
    ___               _           
@@ -556,6 +558,48 @@ class Graph:
             self.addEdge(startVertex, endVertex, edgeLabelList[i]);
         return self
 
+    def printAdjacencyList(self):
+        adjList = self.createAdjacencyList()
+        outStr = ""
+        for i in adjList:
+            outStr += i[0] + ": "
+            for j in i[1]:
+                outStr += j + " "
+            outStr += "\n"
+
+        print(outStr)
+        return outStr
+
+    def printAdjacencyMatrix(self):
+        adjMatrix = self.createAdjacencyMatrix()
+        outStr = ""
+        for nr, i in enumerate(adjMatrix[1]):
+            outStr += "v" + str(nr+1) + ": "
+            for j in i:
+                outStr += str(j) + " "
+            outStr += "\n"
+        print(outStr)
+        return outStr
+
+    def printIncidenceMatrix(self):
+        inMatrix = self.createIncidenceMatrix()
+        edges = inMatrix[0]
+        vertices = inMatrix[1]
+        matrix = inMatrix[2]
+        outStr = "   "
+        for v in vertices:
+            outStr += v + " "
+        outStr += "\n"
+        for i in range(len(edges)):
+            outStr += edges[i] + " "
+            for j in range(len(vertices)):
+                outStr += str(matrix[i][j]) + "  "
+            outStr += "\n"
+
+        print(outStr)
+        return outStr
+
+
     def getVertexIndex(self):
         return self.vertexIndex
 
@@ -885,6 +929,25 @@ def testLoaders():
         assert g.equals(g1)
         assert g.equals(g2)
 
+def testTextLoaders():
+    g = Graph(directed=False)
+    for _ in range(6):
+        g.addVertex()
+    g.addEdge("v1", "v2")
+    g.addEdge("v2", "v2")
+    g.addEdge("v3", "v4")
+    g.addEdge("v4", "v5")
+    g.addEdge("v5", "v3")
+    g.addEdge("v6", "v3")
+    g.addEdge("v1", "v3")
+    drawGraph.drawVertexes(g, 4, 'testText.png')
+
+    g.printAdjacencyList()
+    g.printAdjacencyMatrix()
+    g.printIncidenceMatrix()
+
+
+    
 
 def testRandomGraphGenerator():
     g = Graph.generateRandomGraph(10, 15, directed=False)
@@ -931,6 +994,7 @@ def test():
     testTakeDownDirectional()
     testTakeDownUndirectional()
     # testLoaders()
+    testTextLoaders()
     testRandomGraphGenerator()
     testUndirectionalGraphDrawing()
     testComponents()
