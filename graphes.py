@@ -141,7 +141,10 @@ class Edge:
         return True
     
     def __str__(self):
-        return "(" + self.label + ": " + self.startVertex.label + " -> " + self.endVertex.label + (", wage = " + str(self.wage) if self.wage != 1.0 else "") + ")"
+        #return "(" + self.label + ": " + self.startVertex.label + " -> " + self.endVertex.label + (", wage = " + str(self.wage) if self.wage != 1.0 else "") + ")"
+        return (f"({self.label}: {self.startVertex.label} -> {self.endVertex.label}"
+                + f", weight = {self.wage}" if self.wage != 1.0 else ""
+                )
         
 class Graph:
     """
