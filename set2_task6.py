@@ -1,7 +1,7 @@
 from graphs2 import *
 
-
 if __name__ == "__main__":
+    # Testing for Hamiltonian Graph
     g = Graph(False)
     g != None
     g.addVertex("1")
@@ -27,5 +27,25 @@ if __name__ == "__main__":
     g.addEdge("7", "8")
     graph = prepareGraphForHamilton(g.createAdjacencyList())
     result = hamiltonCycle(list(graph))
-    print("Hamilton cycle :",result)
-    drawCircularGraph(g, 4, "Hamilton.png")
+    print("Hamilton cycle :", result)
+    drawCircularGraph(g, 4, "Hamilton1.png")
+
+    # Testing for Non-Hamiltonian graph
+    g2 = Graph(False)
+    g2 != None
+    g2.addVertex("1")
+    g2.addVertex("2")
+    g2.addVertex("3")
+    g2.addVertex("4")
+    g2.addVertex("5")
+    g2.addEdge("1", "2")
+    g2.addEdge("2", "3")
+    g2.addEdge("3", "4")
+    g2.addEdge("4", "1")
+    g2.addEdge("2", "4")
+    g2.addEdge("2", "5")
+    g2.addEdge("4", "5")
+    drawCircularGraph(g2, 4, "Hamilton2.png")
+    graph2 = prepareGraphForHamilton(g2.createAdjacencyList())
+    result2 = hamiltonCycle(graph2)
+    print("Hamilton cycle :", result2)
