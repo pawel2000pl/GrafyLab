@@ -129,6 +129,6 @@ dmypy.json
 .pyre/
 .directory
 
-*.pnggraphs_documentation.txt
+graphs_documentation.txt
 graphs.html
 *.png
