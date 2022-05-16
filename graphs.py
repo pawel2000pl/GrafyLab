@@ -1,5 +1,7 @@
 import random
 
+from rsa import verify
+
 """
    ___               _           
   / __|_ _ __ _ _ __| |_  ___ ___
@@ -590,7 +592,7 @@ class Graph:
         for nr, i in enumerate(adjMatrix[1]):
             outStr += "v" + str(nr+1) + ": "
             for j in i:
-                outStr += str(j) + " "
+                outStr += str(int(j)) + " "
             outStr += "\n"
         print(outStr)
         return outStr
@@ -599,15 +601,15 @@ class Graph:
         inMatrix = self.createIncidenceMatrix()
         edges = inMatrix[0]
         vertices = inMatrix[1]
-        matrix = inMatrix[2]
-        outStr = "   "
-        for v in vertices:
-            outStr += v + " "
+        matrix = [list(i) for i in zip(*inMatrix[2])] # transpozycja
+        outStr = "    "
+        for e in edges:
+            outStr += "%3s " % e
         outStr += "\n"
-        for i in range(len(edges)):
-            outStr += edges[i] + " "
-            for j in range(len(vertices)):
-                outStr += str(matrix[i][j]) + "  "
+        for i in range(len(vertices)):
+            outStr += "%3s " % vertices[i]
+            for j in range(len(edges)):
+                outStr += "%3d " % matrix[i][j]
             outStr += "\n"
 
         print(outStr)
@@ -700,7 +702,6 @@ class Graph:
         """
         Rekursywne przeszukiwanie w głąb
         """
-        comp[2][0] = 2
         for u in v.adjacentVertices(): # przeglądamy sąsiadów
             try:
                 idx = comp.index([-1, u])

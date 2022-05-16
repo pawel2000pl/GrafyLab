@@ -3,7 +3,7 @@ from drawGraph import *
 import random 
 
 def task1():
-    g = Graph.generateRandomGraph(10, 18)
+    g = Graph.generateRandomGraph(10, 18, directed=False)
     g.removeDuplicatedEdges()
     drawVertexes(g, 3, "set1task1.png")
     g.printAdjacencyList()
