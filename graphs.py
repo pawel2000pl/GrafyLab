@@ -1,5 +1,7 @@
 import random
 
+from rsa import verify
+
 """
    ___               _           
   / __|_ _ __ _ _ __| |_  ___ ___
@@ -590,7 +592,7 @@ class Graph:
         for nr, i in enumerate(adjMatrix[1]):
             outStr += "v" + str(nr+1) + ": "
             for j in i:
-                outStr += str(j) + " "
+                outStr += str(int(j)) + " "
             outStr += "\n"
         print(outStr)
         return outStr
@@ -700,7 +702,6 @@ class Graph:
         """
         Rekursywne przeszukiwanie w głąb
         """
-        comp[2][0] = 2
         for u in v.adjacentVertices(): # przeglądamy sąsiadów
             try:
                 idx = comp.index([-1, u])
