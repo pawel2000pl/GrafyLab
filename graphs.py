@@ -1,12 +1,11 @@
 import random
-
-from rsa import verify
+from math import inf
 
 """
    ___               _           
-  / __|_ _ __ _ _ __| |_  ___ ___
- | (_ | '_/ _` | '_ \ ' \/ -_|_-<
-  \___|_| \__,_| .__/_||_\___/__/
+  / __|_ _ __ _ _ __| |_  ___
+ | (_ | '_/ _` | '_ \ ' \(_-<
+  \___|_| \__,_| .__/_||_/__/
                |_|   
 """
 
@@ -169,7 +168,7 @@ class Edge:
         return True
 
     def __str__(self):
-        return "(" + self.label + ": " + self.startVertex.label + " -> " + self.endVertex.label + (", weight = " + str(self.weight) if self.weight != 1.0 else "") + ")"
+        return "(" + self.label + ": " + self.startVertex.label + {True: " -> ", False: " <-> "}[self.getGraph().isDirected()] + self.endVertex.label + (", weight = " + str(self.weight) if self.weight != 1.0 else "") + ")"
         #return (f"({self.label}: {self.startVertex.label} -> {self.endVertex.label}"
                 #+ f", weight = {self.weight}" if self.weight != 1.0 else ""
                 #)
@@ -282,6 +281,7 @@ class Graph:
             for vertex in self.vertexIndex.values():
                 vertex.inputDegree = vertex.degree
                 vertex.outputDegree = vertex.degree
+                
     def getEdge(self, label: str):
         """
         Zwraca referencję do krawędzi na podstawie etykiety.
@@ -338,12 +338,11 @@ class Graph:
         """
         for vertex in self.vertexIndex.values():
             adjacent = set(edge.endVertex for edge in vertex.outEdges.values())
-            for edge in vertex.outEdges.copy().values():
+            for edge in set(vertex.outEdges.values()):
                 if edge.endVertex in adjacent:
                     adjacent.remove(edge.endVertex)
                 else:
                     edge.removeMe()     
-
 
     def findEdges(self, startVertex, endVertex, oneElementList: bool = False):
         """
@@ -712,6 +711,85 @@ class Graph:
                 continue
 
         return comp
+    
+    def DijkstraDistance(self, startVertex):
+        """
+        Funkcja oblicza odległości wierzchołków od zadanego wierzchołka.
+        Zwraca wyniki w postaci słownika, w którym klucz to etykieta wierzchołka, 
+        a wartość to odległość od wierzchołka startowego.
+        Dodaje także do wierzchołków pole distance, które zawiera te wartości.
+        """
+        if isinstance(startVertex, str):
+            startVertex = self.getVertex(startVertex)
+        
+        for vertex in self.vertexIndex.values():
+            vertex.distance = inf
+            vertex.arrivedFrom = None
+                
+        maxIter = len(self.edgeIndex) * len(self.vertexIndex) + 1
+        it = 0
+        
+        def recurency(currentVertex, currentDistance, arrivedFrom):
+            if currentDistance < currentVertex.distance:
+                nonlocal it
+                it += 1
+                if it >= maxIter:
+                    return
+                currentVertex.distance = currentDistance
+                currentVertex.arrivedFrom = arrivedFrom
+                for edge in currentVertex.outEdges.values():
+                    recurency(edge.oppositeVertex(currentVertex), currentDistance + edge.weight, edge)
+        
+        recurency(startVertex, 0.0, None) 
+        if it >= maxIter:
+            raise Exception("Dijkstra error: probably a negative loop")
+                
+        return {vertex.label: vertex.distance for vertex in self.vertexIndex.values()}
+    
+    def getWayTo(self, destVertex):
+        """
+        Zwraca najkrótszą ścieżkę na podstawie atrybutów arrivedFrom.
+        Wymagane wcześniejsze uruchomienie funkcji DijkstraDistance.
+        """
+        result = []
+        if isinstance(destVertex, str):
+            destVertex = self.getVertex(destVertex)
+        currentVertex = destVertex
+        while currentVertex.arrivedFrom != None:
+            result.append(currentVertex.arrivedFrom)
+            currentVertex = currentVertex.arrivedFrom.oppositeVertex(currentVertex)             
+        return result
+    
+    def minimalSpanningTree(self, initialVertex = None):
+        """
+        Algorytm do generowania drzewa rozpinającego.
+        """
+        for vertex in self.vertexIndex.values():
+            vertex.IWasHere = False
+        
+        if initialVertex == None:
+            currentVertex = self.getVertex(min(self.vertexIndex))
+        elif isinstance(initialVertex, str):
+            currentVertex = self.getVertex(initialVertex)
+        else:
+            currentVertex = initialVertex
+        usedVerticles = {currentVertex}
+        currentVertex.IWasHere = True
+        resultEdges = set()
+        while len(usedVerticles) < len(self.vertexIndex) and len(resultEdges) < len(self.vertexIndex) -1:
+            edgeSet = set()
+            for vertex in usedVerticles:
+                edgeSet = edgeSet.union(set(edge for edge in vertex.outEdges.values() if not edge.oppositeVertex(vertex).IWasHere))            
+            minWeight = min(edge.weight for edge in edgeSet)
+            minEdge = [edge for edge in edgeSet if edge.weight == minWeight][0]
+            minEdge.startVertex.IWasHere = True
+            minEdge.endVertex.IWasHere = True
+            usedVerticles.add(minEdge.startVertex)
+            usedVerticles.add(minEdge.endVertex)
+            resultEdges.add(minEdge)
+        
+        return resultEdges
+        
 
 #  _____       _      
 # |_   _|__ __| |_ ___
@@ -972,8 +1050,6 @@ def testTextLoaders():
     g.printAdjacencyMatrix()
     g.printIncidenceMatrix()
 
-
-    
 
 def testRandomGraphGenerator():
     g = Graph.generateRandomGraph(10, 15, directed=False)
