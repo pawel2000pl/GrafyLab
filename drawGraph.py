@@ -75,3 +75,68 @@ def drawCircularGraph(graph, radius, filename):
     nx.draw(g, pos=pos, with_labels=True)
     plt.savefig(filename)
     plt.clf()
+
+def drawGraphWithWeights(graph, radius, filename):
+    """
+      Dokonuje konwersji z typu Graph na networkx.Graph().
+      Zapisuje wizualizacje grafu do pliku o podanej nazwie
+      Krawędzie oznaczone są swoją wagą
+      """
+    g = nx.Graph()
+    for label, vertex in graph.vertexIndex.items():
+        g.add_node(label)
+    for label, edge in graph.edgeIndex.items():
+        g.add_edge(edge.startVertex.label, edge.endVertex.label, weight=edge.weight)
+
+    weights = [(u, v) for (u, v, d) in g.edges(data=True)]
+
+    print("is this graph connected:", nx.is_connected(g))
+
+    pos = nx.shell_layout(g)
+
+    # nodes
+    nx.draw_networkx_nodes(g, pos=pos)
+    nx.draw_networkx_labels(g, pos)
+
+    # edges
+    nx.draw_networkx_edges(g, pos=pos, edgelist=weights)
+
+    # nx.draw_networkx_edge_labels(g, pos)
+    edge_labels = nx.get_edge_attributes(g, "weight")
+    nx.draw_networkx_edge_labels(g, pos, edge_labels)
+
+    plt.savefig(filename)
+    plt.clf()
+
+def drawDirectedGraphWithWeights(graph, radius, filename, weights = True):
+    """
+      Dokonuje konwersji z typu Graph na networkx.DiGraph().
+      Zapisuje wizualizacje grafu do pliku o podanej nazwie.
+      Krawędzie oznaczone są swoją wagą, Dodaje wagi w zaleznosci
+      od wartosci argumentu weights.
+      """
+    g = nx.DiGraph()
+    for label, vertex in graph.vertexIndex.items():
+        g.add_node(label)
+    for label, edge in graph.edgeIndex.items():
+        g.add_edge(edge.startVertex.label, edge.endVertex.label, weight=edge.weight)
+
+    weights = [(u, v) for (u, v, d) in g.edges(data=True)]
+
+    pos = nx.shell_layout(g)
+
+    # nodes
+    nx.draw_networkx_nodes(g, pos=pos)
+    nx.draw_networkx_labels(g, pos)
+
+    # edges
+
+    nx.draw_networkx_edges(g, pos=pos, edgelist=weights)
+    # nx.draw_networkx_edge_labels(g, pos)
+    if weights is True:
+
+        edge_labels = nx.get_edge_attributes(g, "weight")
+        nx.draw_networkx_edge_labels(g, pos, edge_labels)
+
+    plt.savefig(filename)
+    plt.clf()
