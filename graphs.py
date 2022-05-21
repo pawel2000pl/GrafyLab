@@ -789,7 +789,56 @@ class Graph:
             resultEdges.add(minEdge)
         
         return resultEdges
+
+    def Kosaraju(self):
+        vertices = self.vertexIndex.values()
         
+        d = [[-1, i] for i in vertices] # czas odwiedzenia wierzchołka
+        f = [[-1, i] for i in vertices] # czas przetworzenia wierzchołka
+
+        t = 0
+        for i in d:
+            if i[0] == -1:
+                Graph.DFSvisit(i[1], self, d, f, t)
+        G_t = self.transpose()
+        nr = 0
+        comp = [[-1, v] for v in vertices] # wszystkie wierzchołki są nieodwiedzone
+
+        f = 
+
+    @staticmethod
+    def DFSvisit(v, G, d, f, t):
+        t = t + 1
+        idx = Graph.idxOfVertexInTuple(d, v)
+        d[idx] = t
+        for i in i[0].adjacentVertices():
+            idx = Graph.idxOfVertexInTuple()
+            if d[idx][1] == -1:
+                Graph.DFSvisit(d[idx][0], G, d, f, t)
+
+        t = t + 1
+
+    @staticmethod
+    def idxOfVertexInTuple(t, v):
+        """
+        Funkcja zwraca indeks szukanego wierzchołka w liście krotek
+        [(wierzcholek, wartosc)...]
+        t - lista krotek
+        v - obiekt klasy Vertex
+        """
+        temp = [i[1] for i in t]
+        return temp.index(v)
+
+    def transpose(self):
+        """
+        Metoda zwraca kopię transponowaną kopię grafu.
+        """
+        output = self.copy()
+        for v in output.vertexIndex.values():
+            temp = v.inEdges
+
+
+
 
 #  _____       _      
 # |_   _|__ __| |_ ___
@@ -1086,6 +1135,9 @@ def testComponents():
 
     g.components()
 
+def testKosaraju():
+    g = Graph.generateRandomGraph(10, 10, directed=True)
+    g.Kosaraju()
 
 
 def test():    
@@ -1100,6 +1152,7 @@ def test():
     testRandomGraphGenerator()
     testUndirectionalGraphDrawing()
     testComponents()
+    testKosaraju()
     
     print("Done.")
 
@@ -1124,7 +1177,8 @@ def generateDocumentation(moduleName: str = "graphs"):
 
 if __name__ == "__main__":
     import drawGraph
-    test()
-    generateDocumentation()
+    testKosaraju()
+    # test()
+    # generateDocumentation()
 
     
