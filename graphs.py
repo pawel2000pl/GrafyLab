@@ -62,7 +62,7 @@ class Vertex:
         Zwraca listę wierzchołków przyległych.
         Tylko dla grafów nieskierowanych.
         """
-        adjacencies = [] # lista przyległych wierzchołków
+        adjacencies = []  # lista przyległych wierzchołków
         for e in self.inEdges.values():
             opposite = e.oppositeVertex(self)
             adjacencies.append(opposite)
@@ -94,8 +94,6 @@ class Vertex:
 
     def getLabel(self):
         return self.label
-
-        
 
     def __str__(self):
         result = "[" + self.label + ": "
@@ -162,17 +160,17 @@ class Edge:
         self.startVertex.outputDegree -= 1
         self.endVertex.inEdges.pop(self.label)
         self.startVertex.inputDegree -= 1
-        
+
         temp = self.endVertex
         self.endVertex = self.startVertex
         self.startVertex = temp
-        
+
         self.startVertex.outEdges.update({self.label: self})
         self.startVertex.outputDegree += 1
         self.endVertex.inEdges.update({self.label: self})
         self.startVertex.inputDegree += 1
-        
-        return self        
+
+        return self
 
     def equals(self, another):
         if not isinstance(another, Edge):
@@ -180,18 +178,16 @@ class Edge:
         if self.label != another.label:
             return False
         if self.getGraph().isDirected() and (self.startVertex.label != another.startVertex.label or self.endVertex.label != another.endVertex.label):
-            return False        
+            return False
         if (not self.getGraph().isDirected()) and (self.startVertex.label != another.startVertex.label or self.endVertex.label != another.endVertex.label) and (self.startVertex.label != another.endVertex.label or self.endVertex.label != another.startVertex.label):
-            return False                
+            return False
         if self.weight != another.weight:
             return False
         return True
 
     def __str__(self):
         return "(" + self.label + ": " + self.startVertex.label + {True: " -> ", False: " <-> "}[self.getGraph().isDirected()] + self.endVertex.label + (", weight = " + str(self.weight) if self.weight != 1.0 else "") + ")"
-        #return (f"({self.label}: {self.startVertex.label} -> {self.endVertex.label}"
-                #+ f", weight = {self.weight}" if self.weight != 1.0 else ""
-                #)
+
 
 
 class Graph:
@@ -301,7 +297,7 @@ class Graph:
             for vertex in self.vertexIndex.values():
                 vertex.inputDegree = vertex.degree
                 vertex.outputDegree = vertex.degree
-                
+
     def getEdge(self, label: str):
         """
         Zwraca referencję do krawędzi na podstawie etykiety.
@@ -362,7 +358,7 @@ class Graph:
                 if edge.endVertex in adjacent:
                     adjacent.remove(edge.endVertex)
                 else:
-                    edge.removeMe()     
+                    edge.removeMe()
 
     def findEdges(self, startVertex, endVertex, oneElementList: bool = False):
         """
@@ -491,7 +487,7 @@ class Graph:
         matrix = [[0.0 for i in vertexList] for j in vertexList]
         for i, vertex1 in enumerate(vertexList):
             for j, vertex2 in enumerate(vertexList):
-                matrix[i][j] += sum(edge.weight for edge in self.findEdges(vertex1, vertex2, True))       
+                matrix[i][j] += sum(edge.weight for edge in self.findEdges(vertex1, vertex2, True))
         return (vertexLabelList, matrix)
 
     def loadAdjacencyMatrix(self, matrix):
@@ -526,10 +522,10 @@ class Graph:
         result = []
         for v in self.vertexIndex.values():
             edges = v.getOutEdges()
-            adjacencies = [] # lista przyległych wierzchołków
+            adjacencies = []  # lista przyległych wierzchołków
             for e in edges.values():
-                    opposite = e.oppositeVertex(v)
-                    adjacencies.append(opposite.getLabel())
+                opposite = e.oppositeVertex(v)
+                adjacencies.append(opposite.getLabel())
             result.append((v.getLabel(), adjacencies))
         return result
 
@@ -609,7 +605,7 @@ class Graph:
         adjMatrix = self.createAdjacencyMatrix()
         outStr = ""
         for nr, i in enumerate(adjMatrix[1]):
-            outStr += "v" + str(nr+1) + ": "
+            outStr += "v" + str(nr + 1) + ": "
             for j in i:
                 outStr += str(int(j)) + " "
             outStr += "\n"
@@ -633,7 +629,6 @@ class Graph:
 
         print(outStr)
         return outStr
-
 
     def getVertexIndex(self):
         return self.vertexIndex
@@ -691,29 +686,29 @@ class Graph:
         Algorytm oznaczający spójne składowe.
         Zwraca listę krotek (nr skladowej, wierzcholek)
         """
-        nr = 0 # nr spójnej składowej
+        nr = 0  # nr spójnej składowej
 
         vertices = self.vertexIndex.values()
 
-        comp = [] 
+        comp = []
         for v in vertices:
-            comp.append([-1, v]) # wszystkie wierzchołki są nieodwiedzone
+            comp.append([-1, v])  # wszystkie wierzchołki są nieodwiedzone
 
         for v in comp:
             if v[0] == -1:
                 nr += 1
-                v[0] = nr # oznaczamy v jako odwiedzony i należący do spójnej składowej nr
+                v[0] = nr  # oznaczamy v jako odwiedzony i należący do spójnej składowej nr
                 comp = Graph.components_R(nr, v[1], self, comp)
-        
+
         thegreatestcompList = []
 
         comp_nums = [i[0] for i in comp]
-        thegreatestcomp = max(set(comp_nums), key = comp_nums.count)
+        thegreatestcomp = max(set(comp_nums), key=comp_nums.count)
 
         for i in comp:
             if i[0] == thegreatestcomp:
                 thegreatestcompList.append(i[1].getLabel())
-                
+
         return comp, thegreatestcompList
 
     @staticmethod
@@ -721,7 +716,7 @@ class Graph:
         """
         Rekursywne przeszukiwanie w głąb
         """
-        for u in v.adjacentVertices(): # przeglądamy sąsiadów
+        for u in v.adjacentVertices():  # przeglądamy sąsiadów
             try:
                 idx = comp.index([-1, u])
                 if comp[idx][0] == -1:
@@ -731,7 +726,7 @@ class Graph:
                 continue
 
         return comp
-    
+
     def DijkstraDistance(self, startVertex):
         """
         Funkcja oblicza odległości wierzchołków od zadanego wierzchołka.
@@ -741,14 +736,14 @@ class Graph:
         """
         if isinstance(startVertex, str):
             startVertex = self.getVertex(startVertex)
-        
+
         for vertex in self.vertexIndex.values():
             vertex.distance = inf
             vertex.arrivedFrom = None
-                
+
         maxIter = len(self.edgeIndex) * len(self.vertexIndex) + 1
         it = 0
-        
+
         def recurency(currentVertex, currentDistance, arrivedFrom):
             if currentDistance < currentVertex.distance:
                 nonlocal it
@@ -759,13 +754,13 @@ class Graph:
                 currentVertex.arrivedFrom = arrivedFrom
                 for edge in currentVertex.outEdges.values():
                     recurency(edge.oppositeVertex(currentVertex), currentDistance + edge.weight, edge)
-        
-        recurency(startVertex, 0.0, None) 
+
+        recurency(startVertex, 0.0, None)
         if it >= maxIter:
             raise Exception("Dijkstra error: probably a negative loop")
-                
+
         return {vertex.label: vertex.distance for vertex in self.vertexIndex.values()}
-    
+
     def getWayTo(self, destVertex):
         """
         Zwraca najkrótszą ścieżkę na podstawie atrybutów arrivedFrom.
@@ -777,16 +772,16 @@ class Graph:
         currentVertex = destVertex
         while currentVertex.arrivedFrom != None:
             result.append(currentVertex.arrivedFrom)
-            currentVertex = currentVertex.arrivedFrom.oppositeVertex(currentVertex)             
+            currentVertex = currentVertex.arrivedFrom.oppositeVertex(currentVertex)
         return result
-    
-    def minimalSpanningTree(self, initialVertex = None):
+
+    def minimalSpanningTree(self, initialVertex=None):
         """
         Algorytm do generowania drzewa rozpinającego.
         """
         for vertex in self.vertexIndex.values():
             vertex.IWasHere = False
-        
+
         if initialVertex == None:
             currentVertex = self.getVertex(min(self.vertexIndex))
         elif isinstance(initialVertex, str):
@@ -796,10 +791,10 @@ class Graph:
         usedVerticles = {currentVertex}
         currentVertex.IWasHere = True
         resultEdges = set()
-        while len(usedVerticles) < len(self.vertexIndex) and len(resultEdges) < len(self.vertexIndex) -1:
+        while len(usedVerticles) < len(self.vertexIndex) and len(resultEdges) < len(self.vertexIndex) - 1:
             edgeSet = set()
             for vertex in usedVerticles:
-                edgeSet = edgeSet.union(set(edge for edge in vertex.outEdges.values() if not edge.oppositeVertex(vertex).IWasHere))            
+                edgeSet = edgeSet.union(set(edge for edge in vertex.outEdges.values() if not edge.oppositeVertex(vertex).IWasHere))
             minWeight = min(edge.weight for edge in edgeSet)
             minEdge = [edge for edge in edgeSet if edge.weight == minWeight][0]
             minEdge.startVertex.IWasHere = True
@@ -807,14 +802,14 @@ class Graph:
             usedVerticles.add(minEdge.startVertex)
             usedVerticles.add(minEdge.endVertex)
             resultEdges.add(minEdge)
-        
+
         return resultEdges
 
     def Kosaraju(self):
         vertices = self.vertexIndex.values()
-        
-        d = [[-1, i] for i in vertices] # czas odwiedzenia wierzchołka
-        f = [[-1, i] for i in vertices] # czas przetworzenia wierzchołka
+
+        d = [[-1, i] for i in vertices]  # czas odwiedzenia wierzchołka
+        f = [[-1, i] for i in vertices]  # czas przetworzenia wierzchołka
 
         t = 0
         for i in d:
@@ -822,9 +817,9 @@ class Graph:
                 Graph.DFSvisit(i[1], self, d, f, t)
         G_t = self.transpose()
         nr = 0
-        comp = [[-1, v] for v in vertices] # wszystkie wierzchołki są nieodwiedzone
+        comp = [[-1, v] for v in vertices]  # wszystkie wierzchołki są nieodwiedzone
 
-        f.sort(key = lambda y: y[0], reverse = True)
+        f.sort(key=lambda y: y[0], reverse=True)
         for i in f:
             idx = Graph.idxOfVertexInTuple(comp, i[1])
             if comp[idx][0] == -1:
@@ -865,7 +860,6 @@ class Graph:
 
         return output
 
-
     def transpose(self):
         """
         Metoda zwraca kopię transponowaną kopię grafu.
@@ -875,9 +869,50 @@ class Graph:
             v.switchDirection()
         return transpozed
 
+    def distanceMatrix(self):
+        """
+        Metoda zwraca tablice odleglosci
+        """
+        distanceMatrix = []
+
+        for vertex in self.vertexIndex.values():
+            pathCosts = self.DijkstraDistance(vertex)
+            distanceMatrix.append(list(pathCosts.values()))
+        return distanceMatrix
 
 
-#  _____       _      
+def graphCenterFromDistanceMatrix(distanceMatrix):
+
+    totalDistanceFromOthers = {}
+    finalTotalDistance = {}
+
+    for index, row in enumerate(distanceMatrix, start=1):  # wierzcholki liczymy od 1
+        totalDistanceFromOthers[index] = sum(row)
+
+    minVal = min(totalDistanceFromOthers.values())
+    indexes_of_centre_vertices = [k for k, v in totalDistanceFromOthers.items() if v == minVal]
+    for i in indexes_of_centre_vertices:
+        finalTotalDistance[i] = totalDistanceFromOthers[i]
+
+    return finalTotalDistance
+
+
+def graphMiniMaxCenterFromDistanceMatrix(distanceMatrix):
+
+    maxDistancetoFarthestVertex = {}
+    finalTotalDistance = {}
+    for index, row in enumerate(distanceMatrix, start=1): # wierzcholki liczymy od 1
+        maxDistancetoFarthestVertex[index] = max(row)
+
+    minVal = min(maxDistancetoFarthestVertex.values())
+    indexes_of_centre_vertices = [k for k, v in maxDistancetoFarthestVertex.items() if v == minVal]
+    for i in indexes_of_centre_vertices:
+        finalTotalDistance[i] = minVal
+
+    return finalTotalDistance
+
+
+#  _____       _
 # |_   _|__ __| |_ ___
 #   | |/ -_|_-<  _(_-<
 #   |_|\___/__/\__/__/                
@@ -1083,42 +1118,42 @@ def testLoaders():
         assert g.addEdge("v1", "v2").label == "e1"
         assert g.addEdge("v2", "v3").label == "e2"
         assert g.addEdge("v3", "v1").label == "e3"
-        
+
         g1 = Graph(direction).loadAdjacencyMatrix(g.createAdjacencyMatrix())
         g2 = Graph(direction).loadAdjacencyMatrix(g1.createAdjacencyMatrix())
-        assert g1.equals(g2)        
-        if direction: 
+        assert g1.equals(g2)
+        if direction:
             assert g.equals(g1)
             assert g.equals(g2)
-        
+
         g1 = Graph(direction).loadAdjacencyList(g.createAdjacencyList())
         g2 = Graph(direction).loadAdjacencyList(g1.createAdjacencyList())
         assert g1.equals(g2)
-        if direction: 
+        if direction:
             assert g.equals(g1)
             assert g.equals(g2)
-        
+
         g1 = Graph(direction).loadIncidenceMatrix(g.createIncidenceMatrix())
         g2 = Graph(direction).loadIncidenceMatrix(g1.createIncidenceMatrix())
         assert g1.equals(g2)
-        if direction: 
+        if direction:
             assert g.equals(g1)
             assert g.equals(g2)
-        
-        
+
         g1 = Graph(direction).loadAdjacencyMatrix(g.createAdjacencyMatrix()[1])
         g2 = Graph(direction).loadAdjacencyMatrix(g1.createAdjacencyMatrix()[1])
         assert g1.equals(g2)
-        if direction: 
+        if direction:
             assert g.equals(g1)
             assert g.equals(g2)
-        
+
         g1 = Graph(direction).loadIncidenceMatrix(g.createIncidenceMatrix()[2])
         g2 = Graph(direction).loadIncidenceMatrix(g1.createIncidenceMatrix()[2])
         assert g1.equals(g2)
-        if direction: 
+        if direction:
             assert g.equals(g1)
             assert g.equals(g2)
+
 
 def testTextLoaders():
     g = Graph(directed=False)
@@ -1148,6 +1183,7 @@ def testRandomGraphGenerator():
     print("Generated graph:")
     print(g2)
 
+
 def testComponents():
     g = Graph(directed=False)
     for _ in range(11):
@@ -1165,12 +1201,13 @@ def testComponents():
     g.addEdge("v3", "v6")
     g.addEdge("v4", "v7")
     g.addEdge("v5", "v11")
-    
+
     g.addEdge("v8", "v9")
     g.addEdge("v8", "v10")
     g.addEdge("v9", "v10")
 
     g.components()
+
 
 def testKosaraju():
     from drawGraph import drawDirectedGraphWithWeights
@@ -1186,11 +1223,10 @@ def testKosaraju():
             if i == j[0]:
                 print(f"Spojna skladowa nr: {i}  :   {j[1].getLabel()}")
 
-    
     drawDirectedGraphWithWeights(g, 4, "Kosaraju.png")
 
 
-def test():    
+def test():
     print("Testing...")
 
     testDirectionalGraph()
@@ -1203,7 +1239,7 @@ def test():
     testUndirectionalGraphDrawing()
     testComponents()
     testKosaraju()
-    
+
     print("Done.")
 
 
@@ -1227,7 +1263,6 @@ def generateDocumentation(moduleName: str = "graphs"):
 
 if __name__ == "__main__":
     import drawGraph
+
     test()
     generateDocumentation()
-
-    
