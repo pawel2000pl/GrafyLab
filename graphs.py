@@ -154,6 +154,26 @@ class Edge:
             return self.endVertex
         return self.startVertex
 
+    def switchDirection(self):
+        """
+        Odwraca zwrot krawędzi.
+        """
+        self.startVertex.outEdges.pop(self.label)
+        self.startVertex.outputDegree -= 1
+        self.endVertex.inEdges.pop(self.label)
+        self.startVertex.inputDegree -= 1
+        
+        temp = self.endVertex
+        self.endVertex = self.startVertex
+        self.startVertex = temp
+        
+        self.startVertex.outEdges.update({self.label: self})
+        self.startVertex.outputDegree += 1
+        self.endVertex.inEdges.update({self.label: self})
+        self.startVertex.inputDegree += 1
+        
+        return self        
+
     def equals(self, another):
         if not isinstance(another, Edge):
             return False
