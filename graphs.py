@@ -824,39 +824,56 @@ class Graph:
         nr = 0
         comp = [[-1, v] for v in vertices] # wszystkie wierzchołki są nieodwiedzone
 
-        f = 
+        f.sort(key = lambda y: y[0], reverse = True)
+        for i in f:
+            idx = Graph.idxOfVertexInTuple(comp, i[1])
+            if comp[idx][0] == -1:
+                nr = nr + 1
+                comp[idx][0] = nr
+                Graph.components_R(nr, i[1], G_t, comp)
+        return comp
 
     @staticmethod
     def DFSvisit(v, G, d, f, t):
         t = t + 1
         idx = Graph.idxOfVertexInTuple(d, v)
-        d[idx] = t
-        for i in i[0].adjacentVertices():
-            idx = Graph.idxOfVertexInTuple()
+        d[idx][0] = t
+        for i in v.adjacentVertices():
+            idx = Graph.idxOfVertexInTuple(d, i)
             if d[idx][1] == -1:
                 Graph.DFSvisit(d[idx][0], G, d, f, t)
 
         t = t + 1
+        idx = Graph.idxOfVertexInTuple(f, v)
+        f[idx][0] = t
 
     @staticmethod
-    def idxOfVertexInTuple(t, v):
+    def idxOfVertexInTuple(t, v: Vertex):
         """
         Funkcja zwraca indeks szukanego wierzchołka w liście krotek
-        [(wierzcholek, wartosc)...]
+        [(wartosc, wierzcholek)...]
         t - lista krotek
         v - obiekt klasy Vertex
         """
         temp = [i[1] for i in t]
-        return temp.index(v)
+        try:
+            output = temp.index(v)
+        except ValueError:
+            for idx, i in enumerate(t):
+                if i[1].getLabel() == v.getLabel():
+                    return idx
+
+        return output
+
 
     def transpose(self):
         """
         Metoda zwraca kopię transponowaną kopię grafu.
         """
-        output = self.copy()
-        for v in output.vertexIndex.values():
-            temp = v.inEdges
-
+        transpozed = self.copy()
+        for v in transpozed.edgeIndex.values():
+            v.switchDirection()
+        return transpozed
 
 
 
@@ -1156,8 +1173,21 @@ def testComponents():
     g.components()
 
 def testKosaraju():
-    g = Graph.generateRandomGraph(10, 10, directed=True)
-    g.Kosaraju()
+    from drawGraph import drawDirectedGraphWithWeights
+    g = Graph.generateRandomGraph(15, 15, directed=True)
+    output = g.Kosaraju()
+
+    nr = set()
+    for i in output:
+        nr.add(i[0])
+
+    for i in nr:
+        for j in output:
+            if i == j[0]:
+                print(f"Spojna skladowa nr: {i}  :   {j[1].getLabel()}")
+
+    
+    drawDirectedGraphWithWeights(g, 4, "Kosaraju.png")
 
 
 def test():    
@@ -1197,8 +1227,7 @@ def generateDocumentation(moduleName: str = "graphs"):
 
 if __name__ == "__main__":
     import drawGraph
-    testKosaraju()
-    # test()
-    # generateDocumentation()
+    test()
+    generateDocumentation()
 
     
