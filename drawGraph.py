@@ -108,7 +108,7 @@ def drawGraphWithWeights(graph, radius, filename):
     plt.savefig(filename)
     plt.clf()
 
-def drawDirectedGraphWithWeights(graph, radius, filename, weights = True):
+def drawDirectedGraphWithWeights(graph, radius, filename, showWeights = True):
     """
       Dokonuje konwersji z typu Graph na networkx.DiGraph().
       Zapisuje wizualizacje grafu do pliku o podanej nazwie.
@@ -133,7 +133,7 @@ def drawDirectedGraphWithWeights(graph, radius, filename, weights = True):
 
     nx.draw_networkx_edges(g, pos=pos, edgelist=weights)
     # nx.draw_networkx_edge_labels(g, pos)
-    if weights is True:
+    if showWeights:
 
         edge_labels = nx.get_edge_attributes(g, "weight")
         nx.draw_networkx_edge_labels(g, pos, edge_labels)
