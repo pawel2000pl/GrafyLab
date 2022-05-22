@@ -726,13 +726,52 @@ class Graph:
                 continue
 
         return comp
-
+    
     def DijkstraDistance(self, startVertex):
         """
         Funkcja oblicza odległości wierzchołków od zadanego wierzchołka.
         Zwraca wyniki w postaci słownika, w którym klucz to etykieta wierzchołka, 
         a wartość to odległość od wierzchołka startowego.
         Dodaje także do wierzchołków pole distance, które zawiera te wartości.
+        Algorytm wysypie się dla ujemnych krawędzi, oraz nie wykryje (zawiesi się)
+        dla ujemnych pętli.
+        Jest to klasyczny algorytm Dijkstry.
+        """
+        
+        if isinstance(startVertex, str):
+            startVertex = self.getVertex(startVertex)
+        
+        Q = set(self.vertexIndex.values())
+        
+        for vertex in Q:
+            vertex.distance = inf
+            vertex.arrivedFrom = None        
+                
+        startVertex.distance = 0.0
+        
+        while len(Q) > 0:
+            uv = min(vertex.distance for vertex in Q)
+            u = [vertex for vertex in Q if vertex.distance == uv][0]
+            Q.remove(u)
+            
+            for edge in u.outEdges.values():
+                alt = u.distance + edge.weight
+                v = edge.oppositeVertex(u)
+                if alt < v.distance:
+                    v.distance = alt
+                    v.arrivedFrom = edge
+          
+        return {vertex.label: vertex.distance for vertex in self.vertexIndex.values()}
+        
+    def ShortestDistance(self, startVertex):
+        """
+        Funkcja oblicza odległości wierzchołków od zadanego wierzchołka.
+        Zwraca wyniki w postaci słownika, w którym klucz to etykieta wierzchołka, 
+        a wartość to odległość od wierzchołka startowego.
+        Dodaje także do wierzchołków pole distance, które zawiera te wartości.
+        Algorytm nie wysypie się dla ujemnych krawędzi, oraz wykryje (wyrzuci błąd)
+        dla ujemnych pętli.
+        Jest to Bellman-Ford na sterydach.
         """
         if isinstance(startVertex, str):
             startVertex = self.getVertex(startVertex)
@@ -757,14 +796,14 @@ class Graph:
 
         recurency(startVertex, 0.0, None)
         if it >= maxIter:
-            raise Exception("Dijkstra error: probably a negative loop")
+            raise Exception("Shortest path error: probably a negative loop")
 
         return {vertex.label: vertex.distance for vertex in self.vertexIndex.values()}
 
     def getWayTo(self, destVertex):
         """
         Zwraca najkrótszą ścieżkę na podstawie atrybutów arrivedFrom.
-        Wymagane wcześniejsze uruchomienie funkcji DijkstraDistance.
+        Wymagane wcześniejsze uruchomienie funkcji DijkstraDistance lub ShortestDistance.
         """
         result = []
         if isinstance(destVertex, str):
