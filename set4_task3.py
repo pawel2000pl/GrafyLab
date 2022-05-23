@@ -78,9 +78,31 @@ def testGraph():
     return g
 
 
+def testGraph2():
+    g = Graph(True)
+    g.addVertex('1')
+    g.addVertex('2')
+    g.addVertex('3')
+    g.addVertex('4')
+    g.addVertex('5')
+    g.addVertex('6')
+    g.addEdge('1', '3', None, 1)
+    g.addEdge('1', '5', None, 4)
+    g.addEdge('1', '4', None, 4)
+    g.addEdge('1', '6', None, 9)
+    g.addEdge('2', '3', None, 9)
+    g.addEdge('3', '5', None, 7)
+    g.addEdge('4', '5', None, 9)
+    g.addEdge('4', '6', None, 4)
+    g.addEdge('5', '6', None, 7)
+    return g
+
+
 if __name__ == "__main__":
     g = generateStronglyConnectedDigraph(10, 0.1)
     #g = testGraph()
-    drawGraph.drawDirectedGraphWithWeights(g, 5, 'bellmanFord.png', True)
+    #g = testGraph2()
+    drawGraph.drawDirectedGraphWithWeights(g, 5, 'bellmankhyuFord.png', True)
     print(g.Kosaraju())
     print(bellman_ford(g, choice(list(g.vertexIndex.values()))))
+    # {v1: [2.5399999999999996, v9], v2: [17.119999999999997, v8], v3: [4.93, v10], v4: [-2.4500000000000006, v1], v5: [26.769999999999996, v2], v6: [0, v6], v7: [2.28, v6], v8: [10.7, v7], v9: [-2.1600000000000006, v7], v10: [3.9299999999999993, v4]}
