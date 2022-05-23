@@ -814,7 +814,7 @@ class Graph:
         t = 0
         for i in d:
             if i[0] == -1:
-                Graph.DFSvisit(i[1], self, d, f, t)
+                i[0], self, d, f, t  = Graph.DFSvisit(i[1], self, d, f, t)
         G_t = self.transpose()
         nr = 0
         comp = [[-1, v] for v in vertices]  # wszystkie wierzchołki są nieodwiedzone
@@ -836,11 +836,12 @@ class Graph:
         for i in v.adjacentVertices():
             idx = Graph.idxOfVertexInTuple(d, i)
             if d[idx][1] == -1:
-                Graph.DFSvisit(d[idx][0], G, d, f, t)
+                return Graph.DFSvisit(d[idx][0], G, d, f, t)
 
         t = t + 1
         idx = Graph.idxOfVertexInTuple(f, v)
         f[idx][0] = t
+        return v, G, d, f, t
 
     @staticmethod
     def idxOfVertexInTuple(t, v: Vertex):
@@ -1211,7 +1212,7 @@ def testComponents():
 
 def testKosaraju():
     from drawGraph import drawDirectedGraphWithWeights
-    g = Graph.generateRandomGraph(15, 15, directed=True)
+    g = Graph.generateRandomGraph(8, 10, directed=True)
     output = g.Kosaraju()
 
     nr = set()
@@ -1224,6 +1225,32 @@ def testKosaraju():
                 print(f"Spojna skladowa nr: {i}  :   {j[1].getLabel()}")
 
     drawDirectedGraphWithWeights(g, 4, "Kosaraju.png")
+
+    print(g)
+
+    g2 = Graph(True)
+    for _ in range(7):
+        g2.addVertex()
+    g2.addEdge("v1", "v2")
+    g2.addEdge("v2", "v1")
+    g2.addEdge("v2", "v3")
+    g2.addEdge("v2", "v5")
+    g2.addEdge("v2", "v4")
+    g2.addEdge("v3", "v6")
+    g2.addEdge("v4", "v2")
+    g2.addEdge("v4", "v7")
+    g2.addEdge("v5", "v7")
+    g2.addEdge("v6", "v2")
+    g2.addEdge("v7", "v6")
+    drawDirectedGraphWithWeights(g2, 4, "Kosaraju2.png")
+    output = g2.Kosaraju()
+    for i in output:
+        print(f"{i[0]}:   {i[1].getLabel()}")
+
+
+
+
+
 
 
 def test():
