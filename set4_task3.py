@@ -100,9 +100,19 @@ def testGraph2():
 
 if __name__ == "__main__":
     g = generateStronglyConnectedDigraph(10, 0.1)
-    #g = testGraph()
-    #g = testGraph2()
     drawGraph.drawDirectedGraphWithWeights(g, 5, 'bellmankhyuFord.png', True)
     print(g.Kosaraju())
     print(bellman_ford(g, choice(list(g.vertexIndex.values()))))
-    # {v1: [2.5399999999999996, v9], v2: [17.119999999999997, v8], v3: [4.93, v10], v4: [-2.4500000000000006, v1], v5: [26.769999999999996, v2], v6: [0, v6], v7: [2.28, v6], v8: [10.7, v7], v9: [-2.1600000000000006, v7], v10: [3.9299999999999993, v4]}
+    # Rozwiązanie dla grafu na obrazie bellmanFord.png
+    # {
+    # v1: [2.5399999999999996, v9],
+    # v2: [17.119999999999997, v8],
+    # v3: [4.93, v10],
+    # v4: [-2.4500000000000006, v1],
+    # v5: [26.769999999999996, v2],
+    # v6: [0, v6],
+    # v7: [2.28, v6],
+    # v8: [10.7, v7],
+    # v9: [-2.1600000000000006, v7],
+    # v10: [3.9299999999999993, v4]
+    # }
