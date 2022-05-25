@@ -35,6 +35,11 @@ class Vertex:
 
     def allEdgesList(self):
         return list(self.inEdges.values()) + list(self.outEdges.values())
+    
+    def allEdgesDict(self):
+        result = self.inEdges.copy()
+        result.update(self.outEdges)
+        return result
 
     def calcDegree(self):
         """
@@ -141,6 +146,9 @@ class Edge:
 
     def getLabel(self):
         return self.label
+    
+    def verticlesSet(self):
+        return set([self.startVertex, self.endVertex])
 
     def oppositeVertex(self, vertex: Vertex):
         """
@@ -780,7 +788,7 @@ class Graph:
             vertex.distance = inf
             vertex.arrivedFrom = None
 
-        maxIter = len(self.edgeIndex) * len(self.vertexIndex) + 1
+        maxIter = len(self.edgeIndex) * len(self.vertexIndex) + 2
         it = 0
 
         def recurency(currentVertex, currentDistance, arrivedFrom):
