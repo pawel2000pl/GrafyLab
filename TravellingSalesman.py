@@ -164,7 +164,7 @@ def calc(i):
     while temp > 2.71/n and same <= 6:
         it += 1
         prevDistance = distance
-        for it2 in range(n*n):
+        for it2 in range(round(2.71*n*n)+1):
             valueList = list(g2.edgeIndex.values())
             distance = trySwitchEdges(g2, random.choice(valueList), random.choice(valueList), distance, temp=temp)
             
