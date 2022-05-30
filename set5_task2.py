@@ -146,6 +146,7 @@ def ford_fulkerson(g: Graph, s: Vertex, t: Vertex) -> float:
                 flows[reverseEdge(e).label] = flows[reverseEdge(e).label] - df
                 e = pred[e.startVertex]
             flow = flow + df
+    print(flows)
     return flow
 
 
@@ -270,6 +271,7 @@ def main():
     g = graphGenerators[i]()
     source, sink = source_sinks[i]
     drawGraph.drawDirectedGraphWithWeights(g, 5, 'flownetwork.png', True)
+    print(f'Graf:\n{g}')
     print(f'Maksymalny przepływ jest równy: {ford_fulkerson(g, g.getVertex(source), g.getVertex(sink))}')
 
 
