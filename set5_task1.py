@@ -10,6 +10,8 @@ def canEdgeBeAdded(left: Vertex, right: Vertex, graph: Graph):
         return False
     if graph.findEdges(left, right):
         return False
+    if graph.findEdges(right, left):
+        return False
     if left.equals(right):
         return False
     return True
