@@ -119,6 +119,9 @@ class Vertex:
             result += cont
         return result + "]"
 
+    def __repr__(self):
+        return self.label
+
 class Edge:
     """
       ___    _          
@@ -136,6 +139,16 @@ class Edge:
         self.endVertex: Vertex = endVertex
         self.startVertex.outEdges.update({label: self})
         self.endVertex.inEdges.update({label: self})
+
+    @classmethod
+    def bareEdge(cls, startVertex: Vertex, endVertex: Vertex, label: str, weight: float = 1.0):
+        self = cls.__new__(cls)
+        assert startVertex.graph == endVertex.graph
+        self.label = label
+        self.weight = weight
+        self.startVertex = startVertex
+        self.endVertex = endVertex
+        return self
 
     def getGraph(self):
         assert self.startVertex.graph == self.endVertex.graph
@@ -195,7 +208,6 @@ class Edge:
 
     def __str__(self):
         return "(" + self.label + ": " + self.startVertex.label + {True: " -> ", False: " <-> "}[self.getGraph().isDirected()] + self.endVertex.label + (", weight = " + str(self.weight) if self.weight != 1.0 else "") + ")"
-
 
 
 class Graph:
