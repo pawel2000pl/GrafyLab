@@ -113,13 +113,12 @@ def ford_fulkerson(g: Graph, s: Vertex, t: Vertex) -> float:
     subgraph = flow_subgraph(s, t)
     s = subgraph.getVertex(s.label)
     t = subgraph.getVertex(t.label)
-    # Collapse multiple edges between in subgraph
+    # Collapse multiple edges in subgraph
     for pair in combinations(subgraph.vertexIndex.values(), 2):
         edges = findEdges(subgraph, pair[0], pair[1])
         if len(edges) > 1:
             mergeEdges(subgraph, pair[0], pair[1], edges=edges)
     # # SOLVE PROBLEM
-    n = len(subgraph.vertexIndex.values())
     flow = 0
     edges = list(subgraph.edgeIndex.values())
     flows = {edge.label: 0 for edge in [*edges, *[reverseEdge(e) for e in edges]]}
